@@ -6,8 +6,6 @@ import (
 	"github.com/go-telegram-bot-api/telegram-bot-api"
 )
 
-//type telegramServer struct{}
-
 func Start(token string) {
 	bot, err := tgbotapi.NewBotAPI(token) //FIXME change to use configs
 	if err != nil {
@@ -17,11 +15,14 @@ func Start(token string) {
 	bot.Debug = true
 
 	log.Printf("Authorized on account %s", bot.Self.UserName)
+	processMessage(bot)
+}
 
+func processMessage(bot *tgbotapi.BotAPI) {
 	u := tgbotapi.NewUpdate(0)
 	u.Timeout = 60
 
-	updates, err := bot.GetUpdatesChan(u)
+	updates, _ := bot.GetUpdatesChan(u)
 
 	for update := range updates {
 		if update.Message == nil { // ignore any non-Message Updates
