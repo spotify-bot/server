@@ -3,7 +3,9 @@ package telegram
 import (
 	"log"
 
-	"github.com/go-telegram-bot-api/telegram-bot-api"
+	"github.com/koskalak/mamal/config"
+	tgbotapi "github.com/mohammadkarimi23/telegram-bot-api/v5"
+	"strconv"
 )
 
 func Start(token string) {
@@ -29,11 +31,15 @@ func processMessage(bot *tgbotapi.BotAPI) {
 			continue
 		}
 
-		log.Printf("[%s] %s", update.Message.From.UserName, update.Message.Text)
+		log.Printf("[%s]\n %s\n*********", update.Message.From.UserName, update.Message.Text)
 
-		msg := tgbotapi.NewMessage(update.Message.Chat.ID, update.Message.Text)
+		txt := "Please use the following link for auth: \n" + config.AppConfig.Webserver.Address + "/auth/telegram?user_id=" + strconv.Itoa(update.Message.From.ID) //FIXME change to user_ID
+		msg := tgbotapi.NewMessage(update.Message.Chat.ID, txt)
 		msg.ReplyToMessageID = update.Message.MessageID
 
 		bot.Send(msg)
 	}
 }
+
+func getMessage(user_id string)                   {} //Get link for song from spotify.
+func shareMessage(message string, chat_id string) {} //share message to recipient.

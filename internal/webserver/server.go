@@ -33,8 +33,9 @@ func New(opts WebServerOptions) *WebServer {
 	}
 
 	e.GET("/", webServer.Index)
-	e.GET("/connect/spotify", webServer.SpotifyConnect)
-	e.GET("/callback/spotify", webServer.SpotifyCallback)
+	e.GET("/auth/connect", webServer.SpotifyConnect)   //Get Authorization code from spotify
+	e.GET("/auth/callback", webServer.SpotifyCallback) //Receive access and refesh token from spotify
+	e.GET("/auth/telegram", webServer.TelegramAuth)    //Authenticate Telegram user to spotify
 
 	return webServer
 }
