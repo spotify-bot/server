@@ -38,7 +38,7 @@ func (s *WebServer) SpotifyCallback(c echo.Context) error {
 	authCode := c.QueryParam("code")
 
 	ctx := context.Background() //FIXME
-	token, err := s.authConfig.Exchange(c, authCode)
+	token, err := s.authConfig.Exchange(ctx, authCode)
 	if err != nil {
 		s.server.Logger.Fatal(err)
 	}
