@@ -1,11 +1,11 @@
 package webserver
 
 import (
-	"fmt"
+	"context"
+	"golang.org/x/oauth2"
 	"net/http"
 	"time"
 
-	"github.com/koskalak/mamal/config"
 	"github.com/labstack/echo/v4"
 )
 
@@ -25,12 +25,29 @@ func (s *WebServer) SpotifyConnect(c echo.Context) error {
 
 func (s *WebServer) SpotifyCallback(c echo.Context) error {
 	//Receive access and refesh token from spotify
-	for _, cookie := range c.Cookies() {
-		fmt.Println(cookie.Name)
-		fmt.Println(cookie.Value)
+	platformCookie, err := c.Cookie("platform")
+	if err != nil {
+		s.server.Logger.Panic(err)
 	}
+	userCookie, err := c.Cookie("user_id")
+	if err != nil {
+		s.server.Logger.Panic(err)
+	}
+	platform := platformCookie.Value
+	userID := userCookie.Value
 	authCode := c.QueryParam("code")
-	return c.String(http.StatusOK, "code: "+authCode)
+
+	ctx := context.Background() //FIXME
+	token, err := s.authConfig.Exchange(ctx, authCode)
+	if err != nil {
+		s.server.Logger.Fatal(err)
+	}
+
+	client := s.authConfig.Client(ctx, token)
+	client.Get("...") //FIXME
+	//TODO strore to DB
+
+	return c.String(http.StatusOK, platform+"\n"+userID+"\n"+token.AccessToken)
 }
 
 func (s *WebServer) TelegramAuth(c echo.Context) error {
@@ -52,13 +69,7 @@ func (s *WebServer) TelegramAuth(c echo.Context) error {
 	platformCookie.Expires = time.Now().Add(1 * time.Hour)
 	c.SetCookie(platformCookie)
 
-	//Authenticate Telegram user to spotify
-	client_id := s.spotifyClientID
-	redirect_uri := "http://" + config.AppConfig.Webserver.Address + "/auth/callback" //FIXME
-	scope := "user-read-playback-state"
-	url := fmt.Sprintf("https://accounts.spotify.com/authorize?client_id=%s&response_type=code&scope=%s&redirect_uri=%s", client_id, scope, redirect_uri)
-
-	// Redirect to Spotify auth URL
+	url := s.authConfig.AuthCodeURL("state", oauth2.AccessTypeOffline)
 	c.Redirect(302, url)
 	return nil
 }
