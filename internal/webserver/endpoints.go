@@ -38,7 +38,7 @@ func (s *WebServer) SpotifyCallback(c echo.Context) error {
 	authCode := c.QueryParam("code")
 
 	ctx := context.Background() //FIXME
-	token, err := s.authConfig.Exchange(ctx, authCode)
+	token, err := s.authConfig.Exchange(c, authCode)
 	if err != nil {
 		s.server.Logger.Fatal(err)
 	}
@@ -56,6 +56,7 @@ func (s *WebServer) TelegramAuth(c echo.Context) error {
 	//TODO return error if user_id is not set
 
 	// Set user_id cookie
+	//TODO use JWT token to encrypt cookies
 	userCookie := new(http.Cookie)
 	userCookie.Name = "user_id"
 	userCookie.Value = userID
@@ -70,6 +71,6 @@ func (s *WebServer) TelegramAuth(c echo.Context) error {
 	c.SetCookie(platformCookie)
 
 	url := s.authConfig.AuthCodeURL("state", oauth2.AccessTypeOffline)
-	c.Redirect(302, url)
+	c.Redirect(http.StatusFound, url)
 	return nil
 }
