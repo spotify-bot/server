@@ -15,7 +15,7 @@ func main() {
 	ctx := context.Background()
 
 	mongoStorage, err := mongo.NewMongoStorage(ctx, mongo.MongoStorageOptions{
-		DSN: config.AppConfig.Webserver.MongoSDN,
+		DSN: config.AppConfig.Webserver.MongoDSN,
 	})
 
 	authConf := &oauth2.Config{

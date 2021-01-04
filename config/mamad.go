@@ -9,7 +9,7 @@ type Config struct {
 type Webserver struct {
 	Address   string `mapstructure:"address"`
 	JWTSecret string `mapstructure:"jwtSecret"`
-	MongoSDN  string `mapstructure:"mongoSDN"`
+	MongoDSN  string `mapstructure:"mongoDSN"`
 }
 
 type TelegramBot struct {
