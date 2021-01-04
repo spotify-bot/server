@@ -8,6 +8,7 @@ import (
 	"github.com/koskalak/mamal/internal/mongo"
 	"github.com/koskalak/mamal/internal/webserver"
 	"golang.org/x/oauth2"
+	"golang.org/x/oauth2/spotify"
 )
 
 func main() {
@@ -21,11 +22,8 @@ func main() {
 		ClientID:     config.AppConfig.Spotify.SpotifyClientID,
 		ClientSecret: config.AppConfig.Spotify.SpotifyClientSecret,
 		Scopes:       []string{"user-read-playback-state"},
-		Endpoint: oauth2.Endpoint{
-			AuthURL:  "https://accounts.spotify.com/authorize",
-			TokenURL: "https://accounts.spotify.com/api/token",
-		},
-		RedirectURL: "http://" + config.AppConfig.Webserver.Address + "/auth/callback", //FIXME
+		Endpoint:     spotify.Endpoint,
+		RedirectURL:  "http://" + config.AppConfig.Webserver.Address + "/auth/callback", //FIXME
 	}
 
 	w := webserver.New(webserver.WebServerOptions{
