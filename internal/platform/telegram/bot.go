@@ -3,41 +3,93 @@ package telegram
 import (
 	"log"
 
-	"github.com/koskalak/mamal/config"
+	"github.com/koskalak/mamal/internal/config"
 	tgbotapi "github.com/mohammadkarimi23/telegram-bot-api/v5"
 	"strconv"
 )
 
-func Start(token string) {
+type TGBot struct {
+	bot *tgbotapi.BotAPI
+}
+
+func New(token string) *TGBot {
 	bot, err := tgbotapi.NewBotAPI(token) //FIXME change to use configs
 	if err != nil {
 		log.Panic(err)
 	}
-
-	bot.Debug = true
-
 	log.Printf("Authorized on account %s", bot.Self.UserName)
-	processMessage(bot)
+	telegramBot := TGBot{
+		bot: bot,
+	}
+	return &telegramBot
 }
 
-func processMessage(bot *tgbotapi.BotAPI) {
+func (tb *TGBot) Start() {
+	tb.bot.Debug = false
+
 	u := tgbotapi.NewUpdate(0)
 	u.Timeout = 60
 
-	updates, _ := bot.GetUpdatesChan(u)
+	updates, _ := tb.bot.GetUpdatesChan(u)
 
 	for update := range updates {
-		if update.Message == nil { // ignore any non-Message Updates
+		if update.InlineQuery != nil {
+			tb.processInlineQuery(&update)
+		} else if update.Message != nil {
+			if update.Message.IsCommand() {
+				tb.processCommand(&update)
+			} else {
+				tb.processDirectMessage(&update)
+			}
+		} else {
 			continue
 		}
+	}
+}
 
-		log.Printf("[%s]\n %s\n*********", update.Message.From.UserName, update.Message.Text)
+func (tb *TGBot) processCommand(update *tgbotapi.Update) {
+	msg := tgbotapi.NewMessage(update.Message.Chat.ID, "")
+	//	txt := "Please use the following link for auth: \n" + //FIXME change to user_ID
+	switch update.Message.Command() {
+	case "start":
+		msg.ReplyMarkup = getAuthMessage(strconv.Itoa(update.Message.From.ID))
+		msg.Text = "Click here to login to Spotify."
+	case "help":
+		msg.Text = "type /auth to authenticate to Spotify."
+	case "auth":
+		msg.ReplyMarkup = getAuthMessage(strconv.Itoa(update.Message.From.ID))
+		msg.Text = "Click here to login to Spotify."
+	default:
+		msg.Text = "I don't know that command"
+	}
+	tb.bot.Send(msg)
+}
 
-		txt := "Please use the following link for auth: \n" + config.AppConfig.Webserver.Address + "/auth/telegram?user_id=" + strconv.Itoa(update.Message.From.ID) //FIXME change to user_ID
-		msg := tgbotapi.NewMessage(update.Message.Chat.ID, txt)
-		msg.ReplyToMessageID = update.Message.MessageID
+func (tb *TGBot) processDirectMessage(update *tgbotapi.Update) {
+	log.Printf("Message from [%s]:  %s\n", update.Message.From.UserName, update.Message.Text)
 
-		bot.Send(msg)
+	txt := "Please use the following link for auth: \n" + config.AppConfig.Webserver.Address + "/auth/telegram?user_id=" + strconv.Itoa(update.Message.From.ID) //FIXME change to user_ID
+	msg := tgbotapi.NewMessage(update.Message.Chat.ID, txt)
+
+	tb.bot.Send(msg)
+}
+
+func (tb *TGBot) processInlineQuery(update *tgbotapi.Update) {
+
+	article := tgbotapi.NewInlineQueryResultArticle(update.InlineQuery.ID, "Echo", update.InlineQuery.Query)
+	article.Description = update.InlineQuery.Query
+
+	inlineConf := tgbotapi.InlineConfig{
+		InlineQueryID:     update.InlineQuery.ID,
+		IsPersonal:        true,
+		CacheTime:         0,
+		Results:           []interface{}{article},
+		SwitchPMText:      "Login to Spotify",
+		SwitchPMParameter: "auth",
+	}
+
+	if _, err := tb.bot.AnswerInlineQuery(inlineConf); err != nil {
+		log.Println(err)
 	}
 }
 
