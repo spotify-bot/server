@@ -4,7 +4,7 @@ import (
 	"context"
 	"log"
 
-	"github.com/koskalak/mamal/config"
+	"github.com/koskalak/mamal/internal/config"
 	"github.com/koskalak/mamal/internal/mongo"
 	"github.com/koskalak/mamal/internal/webserver"
 	"golang.org/x/oauth2"

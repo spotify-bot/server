@@ -3,7 +3,7 @@ package telegram
 import (
 	"log"
 
-	"github.com/koskalak/mamal/config"
+	"github.com/koskalak/mamal/internal/config"
 	tgbotapi "github.com/mohammadkarimi23/telegram-bot-api/v5"
 	"strconv"
 )
@@ -33,12 +33,14 @@ func (tb *TGBot) Start() {
 	updates, _ := tb.bot.GetUpdatesChan(u)
 
 	for update := range updates {
-		if update.Message.IsCommand() {
-			tb.processCommand(&update)
-		} else if update.Message != nil {
-			tb.processDirectMessage(&update)
-		} else if update.InlineQuery != nil {
+		if update.InlineQuery != nil {
 			tb.processInlineQuery(&update)
+		} else if update.Message != nil {
+			if update.Message.IsCommand() {
+				tb.processCommand(&update)
+			} else {
+				tb.processDirectMessage(&update)
+			}
 		} else {
 			continue
 		}
@@ -49,6 +51,9 @@ func (tb *TGBot) processCommand(update *tgbotapi.Update) {
 	msg := tgbotapi.NewMessage(update.Message.Chat.ID, "")
 	//	txt := "Please use the following link for auth: \n" + //FIXME change to user_ID
 	switch update.Message.Command() {
+	case "start":
+		msg.ReplyMarkup = getAuthMessage(strconv.Itoa(update.Message.From.ID))
+		msg.Text = "Click here to login to Spotify."
 	case "help":
 		msg.Text = "type /auth to authenticate to Spotify."
 	case "auth":
@@ -71,31 +76,21 @@ func (tb *TGBot) processDirectMessage(update *tgbotapi.Update) {
 
 func (tb *TGBot) processInlineQuery(update *tgbotapi.Update) {
 
-	log.Printf("Inline Queryyyyyyyyyyyyyyyy")
-
 	article := tgbotapi.NewInlineQueryResultArticle(update.InlineQuery.ID, "Echo", update.InlineQuery.Query)
 	article.Description = update.InlineQuery.Query
 
 	inlineConf := tgbotapi.InlineConfig{
-		InlineQueryID: update.InlineQuery.ID,
-		IsPersonal:    true,
-		CacheTime:     0,
-		Results:       []interface{}{article},
+		InlineQueryID:     update.InlineQuery.ID,
+		IsPersonal:        true,
+		CacheTime:         0,
+		Results:           []interface{}{article},
+		SwitchPMText:      "Login to Spotify",
+		SwitchPMParameter: "auth",
 	}
 
 	if _, err := tb.bot.AnswerInlineQuery(inlineConf); err != nil {
 		log.Println(err)
 	}
-}
-
-func getAuthMessage(userID string) tgbotapi.InlineKeyboardMarkup {
-
-	link := "http://" + config.AppConfig.Webserver.Address + "/auth/telegram?user_id=" + userID //FIXME dev config
-	return tgbotapi.NewInlineKeyboardMarkup(
-		tgbotapi.NewInlineKeyboardRow(
-			tgbotapi.NewInlineKeyboardButtonURL("Login to Spotify", link),
-		),
-	)
 }
 
 func getMessage(user_id string)                   {} //Get link for song from spotify.
