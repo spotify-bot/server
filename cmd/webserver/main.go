@@ -6,9 +6,10 @@ import (
 
 	"github.com/koskalak/mamal/internal/config"
 	"github.com/koskalak/mamal/internal/mongo"
+	"github.com/koskalak/mamal/internal/spotify"
 	"github.com/koskalak/mamal/internal/webserver"
 	"golang.org/x/oauth2"
-	"golang.org/x/oauth2/spotify"
+	spotifyOauth "golang.org/x/oauth2/spotify"
 )
 
 func main() {
@@ -22,13 +23,17 @@ func main() {
 		ClientID:     config.AppConfig.Spotify.SpotifyClientID,
 		ClientSecret: config.AppConfig.Spotify.SpotifyClientSecret,
 		Scopes:       []string{"user-read-playback-state"},
-		Endpoint:     spotify.Endpoint,
+		Endpoint:     spotifyOauth.Endpoint,
 		RedirectURL:  "http://" + config.AppConfig.Webserver.Address + "/auth/callback", //FIXME
 	}
 
-	w := webserver.New(webserver.WebServerOptions{
-		Mongo:      mongoStorage,
+	s := spotify.New(spotify.ProviderOptions{
+		Db:         mongoStorage,
 		AuthConfig: authConf,
+	})
+
+	w := webserver.New(webserver.WebServerOptions{
+		Spotify: s,
 	})
 
 	err = w.Start(config.AppConfig.Webserver.Address)
