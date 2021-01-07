@@ -13,12 +13,6 @@ import (
 
 const OAuthTokenCollection = "oauth_tokens"
 
-type oauthPlatform string
-
-const (
-	PlatformTelegram oauthPlatform = "telegram"
-)
-
 type MongoStorageOptions struct {
 	DSN string
 }
@@ -57,7 +51,7 @@ type OAuthToken struct {
 	AccessToken  string             `bson:"access_token"`
 	RefreshToken string             `bson:"refresh_token"`
 	UserID       string             `bson:"user_id"`
-	Platform     oauthPlatform      `bson:"platform"`
+	Platform     string             `bson:"platform"`
 }
 
 func (m *MongoStorage) UpsertOAuthToken(ctx context.Context, token OAuthToken) error {
@@ -78,7 +72,7 @@ func (m *MongoStorage) UpsertOAuthToken(ctx context.Context, token OAuthToken) e
 	return nil
 }
 
-func (m *MongoStorage) GetOAuthTokenByUserID(ctx context.Context, userID string, platform oauthPlatform) (*OAuthToken, error) {
+func (m *MongoStorage) GetOAuthTokenByUserID(ctx context.Context, userID string, platform string) (*OAuthToken, error) {
 	collection := m.database.Collection(OAuthTokenCollection)
 
 	filter := bson.D{

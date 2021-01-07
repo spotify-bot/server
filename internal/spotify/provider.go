@@ -37,8 +37,19 @@ func (s *SpotifyProvider) AddUser(code, platform, userID string) error {
 
 	client := s.authConfig.Client(ctx, token)
 	client.Get("...") //FIXME
+
+	mongoRow := mongo.OAuthToken{
+		AccessToken:  token.AccessToken,
+		RefreshToken: token.RefreshToken,
+		Platform:     platform,
+		UserID:       userID,
+	}
+	if err = s.db.UpsertOAuthToken(ctx, mongoRow); err != nil {
+		log.Println("Failed to add token to database")
+	}
+
 	//TODO strore to DB
 	log.Println("Authentication Successful!")
-	log.Println("Code: [%s]\nPlatform: [%s]\nUser ID: [%s]", code, platform, userID)
+	log.Printf("Code: [%s]\nPlatform: [%s]\nUser ID: [%s]", code, platform, userID)
 	return nil
 }
