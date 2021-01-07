@@ -8,6 +8,7 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"go.mongodb.org/mongo-driver/x/mongo/driver/connstring"
+	"time"
 )
 
 const OAuthTokenCollection = "oauth_tokens"
@@ -27,12 +28,22 @@ type MongoStorage struct {
 }
 
 func NewMongoStorage(ctx context.Context, opts MongoStorageOptions) (*MongoStorage, error) {
-	client, err := mongo.Connect(ctx, options.Client().ApplyURI(opts.DSN))
 
+	client, err := mongo.NewClient(options.Client().ApplyURI(opts.DSN))
+	if err != nil {
+		return nil, err
+	}
+	ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
+	defer cancel()
+	err = client.Connect(ctx)
 	if err != nil {
 		return nil, err
 	}
 
+	err = client.Ping(ctx, nil)
+	if err != nil {
+		return nil, err
+	}
 	cs, _ := connstring.ParseAndValidate(opts.DSN)
 	database := client.Database(cs.Database)
 

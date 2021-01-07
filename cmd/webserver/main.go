@@ -18,7 +18,9 @@ func main() {
 	mongoStorage, err := mongo.NewMongoStorage(ctx, mongo.MongoStorageOptions{
 		DSN: config.AppConfig.Webserver.MongoDSN,
 	})
-
+	if err != nil {
+		log.Fatalf("Failed to connect to Mongo Storage", err)
+	}
 	authConf := &oauth2.Config{
 		ClientID:     config.AppConfig.Spotify.SpotifyClientID,
 		ClientSecret: config.AppConfig.Spotify.SpotifyClientSecret,
