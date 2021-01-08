@@ -5,7 +5,6 @@ import (
 	"log"
 
 	"github.com/koskalak/mamal/internal/config"
-	"github.com/koskalak/mamal/internal/mongo"
 	"github.com/koskalak/mamal/internal/spotify"
 	"github.com/koskalak/mamal/internal/webserver"
 	"golang.org/x/oauth2"
@@ -15,12 +14,6 @@ import (
 func main() {
 	ctx := context.Background()
 
-	mongoStorage, err := mongo.NewMongoStorage(ctx, mongo.MongoStorageOptions{
-		DSN: config.AppConfig.Webserver.MongoDSN,
-	})
-	if err != nil {
-		log.Fatalf("Failed to connect to Mongo Storage", err)
-	}
 	authConf := &oauth2.Config{
 		ClientID:     config.AppConfig.Spotify.SpotifyClientID,
 		ClientSecret: config.AppConfig.Spotify.SpotifyClientSecret,
@@ -29,10 +22,13 @@ func main() {
 		RedirectURL:  "http://" + config.AppConfig.Webserver.Address + "/auth/callback", //FIXME
 	}
 
-	s := spotify.New(spotify.ProviderOptions{
-		Db:         mongoStorage,
-		AuthConfig: authConf,
+	s, err := spotify.New(ctx, spotify.ProviderOptions{
+		DatabaseDSN: config.AppConfig.Webserver.MongoDSN,
+		AuthConfig:  authConf,
 	})
+	if err != nil {
+		log.Fatal("Failed to connect to Mongo Storage", err)
+	}
 
 	w := webserver.New(webserver.WebServerOptions{
 		Spotify: s,

@@ -8,8 +8,8 @@ import (
 )
 
 type ProviderOptions struct {
-	Db         *mongo.MongoStorage
-	AuthConfig *oauth2.Config
+	DatabaseDSN string
+	AuthConfig  *oauth2.Config
 }
 
 type SpotifyProvider struct {
@@ -17,11 +17,24 @@ type SpotifyProvider struct {
 	authConfig *oauth2.Config
 }
 
-func New(opts ProviderOptions) *SpotifyProvider {
-	return &SpotifyProvider{
-		db:         opts.Db,
-		authConfig: opts.AuthConfig,
+var provider *SpotifyProvider
+
+func New(ctx context.Context, opts ProviderOptions) (*SpotifyProvider, error) {
+	if provider != nil {
+		return provider, nil
 	}
+
+	mongoStorage, err := mongo.NewMongoStorage(ctx, mongo.MongoStorageOptions{
+		DSN: opts.DatabaseDSN,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	return &SpotifyProvider{
+		db:         mongoStorage,
+		authConfig: opts.AuthConfig,
+	}, nil
 }
 
 func (s *SpotifyProvider) GetAuthURL() string {
