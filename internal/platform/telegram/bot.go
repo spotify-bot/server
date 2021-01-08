@@ -4,22 +4,30 @@ import (
 	"log"
 
 	"github.com/koskalak/mamal/internal/config"
+	"github.com/koskalak/mamal/internal/spotify"
 	tgbotapi "github.com/mohammadkarimi23/telegram-bot-api/v5"
 	"strconv"
 )
 
 type TGBot struct {
-	bot *tgbotapi.BotAPI
+	bot     *tgbotapi.BotAPI
+	spotify *spotify.SpotifyProvider
 }
 
-func New(token string) *TGBot {
-	bot, err := tgbotapi.NewBotAPI(token) //FIXME change to use configs
+type TGBotOptions struct {
+	Token           string
+	SpotifyProvider *spotify.SpotifyProvider
+}
+
+func New(opts TGBotOptions) *TGBot {
+	bot, err := tgbotapi.NewBotAPI(opts.Token) //FIXME change to use configs
 	if err != nil {
 		log.Panic(err)
 	}
 	log.Printf("Authorized on account %s", bot.Self.UserName)
 	telegramBot := TGBot{
-		bot: bot,
+		bot:     bot,
+		spotify: opts.SpotifyProvider,
 	}
 	return &telegramBot
 }
