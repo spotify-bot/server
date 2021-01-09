@@ -17,7 +17,7 @@ func main() {
 	authConf := &oauth2.Config{
 		ClientID:     config.AppConfig.Spotify.SpotifyClientID,
 		ClientSecret: config.AppConfig.Spotify.SpotifyClientSecret,
-		Scopes:       []string{"user-read-playback-state"},
+		Scopes:       []string{"user-read-currently-playing"},
 		Endpoint:     spotifyOauth.Endpoint,
 		RedirectURL:  "http://" + config.AppConfig.Webserver.Address + "/auth/callback", //FIXME
 	}

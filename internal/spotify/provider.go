@@ -2,9 +2,12 @@ package spotify
 
 import (
 	"context"
+	"encoding/json"
 	"github.com/koskalak/mamal/internal/mongo"
 	"golang.org/x/oauth2"
+	"io/ioutil"
 	"log"
+	"net/http"
 )
 
 type ProviderOptions struct {
@@ -54,6 +57,8 @@ func (s *SpotifyProvider) AddUser(code, platform, userID string) error {
 	mongoRow := mongo.OAuthToken{
 		AccessToken:  token.AccessToken,
 		RefreshToken: token.RefreshToken,
+		TokenType:    token.Type(),
+		Expiry:       token.Expiry,
 		Platform:     platform,
 		UserID:       userID,
 	}
@@ -63,6 +68,39 @@ func (s *SpotifyProvider) AddUser(code, platform, userID string) error {
 
 	//TODO strore to DB
 	log.Println("Authentication Successful!")
-	log.Printf("Code: [%s]\nPlatform: [%s]\nUser ID: [%s]", code, platform, userID)
+	log.Printf("Code: [%s]\nPlatform: [%s]\nUser ID: [%s]", token.AccessToken, platform, userID)
 	return nil
+}
+
+func (s *SpotifyProvider) GetRecentlyPlayed(platform, userID string) (track *Item, err error) {
+	ctx := context.Background()
+	mongoToken, err := s.db.GetOAuthTokenByUserID(ctx, userID, platform)
+	if err != nil {
+		return
+	}
+
+	token := &oauth2.Token{
+		AccessToken:  mongoToken.AccessToken,
+		RefreshToken: mongoToken.RefreshToken,
+		TokenType:    mongoToken.TokenType,
+		Expiry:       mongoToken.Expiry,
+	}
+	client := s.authConfig.Client(ctx, token)
+	track, err = getRecentlyPlayedSongLink(client)
+	return
+}
+
+func getRecentlyPlayedSongLink(client *http.Client) (*Item, error) {
+	resp, err := client.Get(RecentlyPlayedEndpoint)
+	if err != nil {
+		return nil, nil
+	}
+	defer resp.Body.Close()
+	body, err := ioutil.ReadAll(resp.Body)
+
+	var response Response
+	if err = json.Unmarshal(body, &response); err != nil {
+		return nil, err
+	}
+	return &response.Item, nil
 }

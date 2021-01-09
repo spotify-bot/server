@@ -84,6 +84,13 @@ func (tb *TGBot) processDirectMessage(update *tgbotapi.Update) {
 
 func (tb *TGBot) processInlineQuery(update *tgbotapi.Update) {
 
+	rp, err := tb.spotify.GetRecentlyPlayed("telegram", strconv.Itoa(update.InlineQuery.From.ID))
+	if err != nil {
+		log.Println("Failed to get recently played song", err)
+	} else {
+		log.Println("Here comes the result: ", spotify.OpenSpotifyTrackEndpoint+rp.ID)
+	}
+
 	article := tgbotapi.NewInlineQueryResultArticle(update.InlineQuery.ID, "Echo", update.InlineQuery.Query)
 	article.Description = update.InlineQuery.Query
 
