@@ -84,27 +84,25 @@ func (tb *TGBot) processDirectMessage(update *tgbotapi.Update) {
 
 func (tb *TGBot) processInlineQuery(update *tgbotapi.Update) {
 
-	rp, err := tb.spotify.GetRecentlyPlayed("telegram", strconv.Itoa(update.InlineQuery.From.ID))
-	if err != nil {
-		log.Println("Failed to get recently played song", err)
-	} else {
-		log.Println("Here comes the result: ", spotify.OpenSpotifyTrackEndpoint+rp.ID)
+	inlineConf := tgbotapi.InlineConfig{
+		InlineQueryID: update.InlineQuery.ID,
+		IsPersonal:    true,
+		CacheTime:     0,
 	}
 
-	article := tgbotapi.NewInlineQueryResultArticle(update.InlineQuery.ID, "Echo", update.InlineQuery.Query)
-	article.Description = update.InlineQuery.Query
-
-	inlineConf := tgbotapi.InlineConfig{
-		InlineQueryID:     update.InlineQuery.ID,
-		IsPersonal:        true,
-		CacheTime:         0,
-		Results:           []interface{}{article},
-		SwitchPMText:      "Login to Spotify",
-		SwitchPMParameter: "auth",
+	rp, err := tb.spotify.GetRecentlyPlayed("telegram", strconv.Itoa(update.InlineQuery.From.ID))
+	if err != nil { //If not logged in, show the log in keyboard button
+		log.Println("Failed to get recently played song", err)
+		inlineConf.SwitchPMText = "Login to Spotify"
+		inlineConf.SwitchPMParameter = "auth"
+	} else {
+		songLink := spotify.OpenSpotifyTrackEndpoint + rp.ID
+		article := getTrackQueryResult(update.InlineQuery.ID, "kir", songLink, songLink)
+		inlineConf.Results = []interface{}{article}
 	}
 
 	if _, err := tb.bot.AnswerInlineQuery(inlineConf); err != nil {
-		log.Println(err)
+		log.Println("Failed to answer inline query: ", err)
 	}
 }
 
