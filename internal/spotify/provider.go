@@ -44,7 +44,7 @@ func (s *SpotifyProvider) GetAuthURL() string {
 	return s.authConfig.AuthCodeURL("state", oauth2.AccessTypeOffline)
 }
 
-func (s *SpotifyProvider) AddUser(code, platform, userID string) error {
+func (s *SpotifyProvider) AddUser(code string, platform OauthPlatform, userID string) error {
 	ctx := context.Background() //FIXME
 	token, err := s.authConfig.Exchange(ctx, code)
 	if err != nil {
@@ -59,22 +59,20 @@ func (s *SpotifyProvider) AddUser(code, platform, userID string) error {
 		RefreshToken: token.RefreshToken,
 		TokenType:    token.Type(),
 		Expiry:       token.Expiry,
-		Platform:     platform,
+		Platform:     string(platform),
 		UserID:       userID,
 	}
 	if err = s.db.UpsertOAuthToken(ctx, mongoRow); err != nil {
 		log.Println("Failed to add token to database")
 	}
 
-	//TODO strore to DB
-	log.Println("Authentication Successful!")
 	log.Printf("Code: [%s]\nPlatform: [%s]\nUser ID: [%s]", token.AccessToken, platform, userID)
 	return nil
 }
 
-func (s *SpotifyProvider) GetRecentlyPlayed(platform, userID string) (track *Item, err error) {
+func (s *SpotifyProvider) GetRecentlyPlayed(platform OauthPlatform, userID string) (track *Item, err error) {
 	ctx := context.Background()
-	mongoToken, err := s.db.GetOAuthTokenByUserID(ctx, userID, platform)
+	mongoToken, err := s.db.GetOAuthTokenByUserID(ctx, userID, string(platform))
 	if err != nil {
 		return
 	}

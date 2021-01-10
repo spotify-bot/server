@@ -90,7 +90,7 @@ func (tb *TGBot) processInlineQuery(update *tgbotapi.Update) {
 		CacheTime:     0,
 	}
 
-	rp, err := tb.spotify.GetRecentlyPlayed("telegram", strconv.Itoa(update.InlineQuery.From.ID))
+	rp, err := tb.spotify.GetRecentlyPlayed(spotify.PlatformTelegram, strconv.Itoa(update.InlineQuery.From.ID))
 	if err != nil { //If not logged in, show the log in keyboard button
 		log.Println("Failed to get recently played song", err)
 		inlineConf.SwitchPMText = "Login to Spotify"

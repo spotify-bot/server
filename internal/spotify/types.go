@@ -1,8 +1,11 @@
 package spotify
 
+type OauthPlatform string
+
 const (
-	OpenSpotifyTrackEndpoint = "https://open.spotify.com/track/"
-	RecentlyPlayedEndpoint   = "https://api.spotify.com/v1/me/player/currently-playing"
+	OpenSpotifyTrackEndpoint               = "https://open.spotify.com/track/"
+	RecentlyPlayedEndpoint                 = "https://api.spotify.com/v1/me/player/currently-playing"
+	PlatformTelegram         OauthPlatform = "telegram"
 )
 
 type Response struct {

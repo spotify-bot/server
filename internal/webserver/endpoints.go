@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/koskalak/mamal/internal/spotify"
 	"github.com/labstack/echo/v4"
 )
 
@@ -31,10 +32,18 @@ func (s *WebServer) SpotifyCallback(c echo.Context) error {
 	if err != nil {
 		s.server.Logger.Panic(err)
 	}
-	platform := platformCookie.Value
+
+	var oathPlatform spotify.OauthPlatform
+	switch platform := platformCookie.Value; platform {
+	case "telegram":
+		oathPlatform = spotify.PlatformTelegram
+	default:
+		s.server.Logger.Panic("Unsupported Platform")
+	}
+
 	userID := userCookie.Value
 	authCode := c.QueryParam("code")
-	s.spotify.AddUser(authCode, platform, userID) //TODO get error
+	s.spotify.AddUser(authCode, oathPlatform, userID) //TODO get error
 
 	return c.String(200, "Authentication Successful")
 }
