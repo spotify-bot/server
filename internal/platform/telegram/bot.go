@@ -4,22 +4,30 @@ import (
 	"log"
 
 	"github.com/koskalak/mamal/internal/config"
+	"github.com/koskalak/mamal/internal/spotify"
 	tgbotapi "github.com/mohammadkarimi23/telegram-bot-api/v5"
 	"strconv"
 )
 
 type TGBot struct {
-	bot *tgbotapi.BotAPI
+	bot     *tgbotapi.BotAPI
+	spotify *spotify.SpotifyProvider
 }
 
-func New(token string) *TGBot {
-	bot, err := tgbotapi.NewBotAPI(token) //FIXME change to use configs
+type TGBotOptions struct {
+	Token           string
+	SpotifyProvider *spotify.SpotifyProvider
+}
+
+func New(opts TGBotOptions) *TGBot {
+	bot, err := tgbotapi.NewBotAPI(opts.Token) //FIXME change to use configs
 	if err != nil {
 		log.Panic(err)
 	}
 	log.Printf("Authorized on account %s", bot.Self.UserName)
 	telegramBot := TGBot{
-		bot: bot,
+		bot:     bot,
+		spotify: opts.SpotifyProvider,
 	}
 	return &telegramBot
 }
@@ -76,20 +84,25 @@ func (tb *TGBot) processDirectMessage(update *tgbotapi.Update) {
 
 func (tb *TGBot) processInlineQuery(update *tgbotapi.Update) {
 
-	article := tgbotapi.NewInlineQueryResultArticle(update.InlineQuery.ID, "Echo", update.InlineQuery.Query)
-	article.Description = update.InlineQuery.Query
-
 	inlineConf := tgbotapi.InlineConfig{
-		InlineQueryID:     update.InlineQuery.ID,
-		IsPersonal:        true,
-		CacheTime:         0,
-		Results:           []interface{}{article},
-		SwitchPMText:      "Login to Spotify",
-		SwitchPMParameter: "auth",
+		InlineQueryID: update.InlineQuery.ID,
+		IsPersonal:    true,
+		CacheTime:     0,
+	}
+
+	rp, err := tb.spotify.GetRecentlyPlayed(spotify.PlatformTelegram, strconv.Itoa(update.InlineQuery.From.ID))
+	if err != nil { //If not logged in, show the log in keyboard button
+		log.Println("Failed to get recently played song", err)
+		inlineConf.SwitchPMText = "Login to Spotify"
+		inlineConf.SwitchPMParameter = "auth"
+	} else {
+		songLink := spotify.OpenSpotifyTrackEndpoint + rp.ID
+		article := getTrackQueryResult(update.InlineQuery.ID, rp.Name, songLink, songLink)
+		inlineConf.Results = []interface{}{article}
 	}
 
 	if _, err := tb.bot.AnswerInlineQuery(inlineConf); err != nil {
-		log.Println(err)
+		log.Println("Failed to answer inline query: ", err)
 	}
 }
 

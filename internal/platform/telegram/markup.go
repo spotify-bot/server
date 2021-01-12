@@ -14,3 +14,15 @@ func getAuthMessage(userID string) tgbotapi.InlineKeyboardMarkup {
 		),
 	)
 }
+
+func getTrackQueryResult(id, title, url, messageText string) tgbotapi.InlineQueryResultArticle {
+	return tgbotapi.InlineQueryResultArticle{
+		Type:  "article",
+		ID:    id,
+		Title: title,
+		URL:   url,
+		InputMessageContent: tgbotapi.InputTextMessageContent{
+			Text: messageText,
+		},
+	}
+}

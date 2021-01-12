@@ -1,21 +1,18 @@
 package webserver
 
 import (
-	"github.com/koskalak/mamal/internal/mongo"
+	"github.com/koskalak/mamal/internal/spotify"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
-	"golang.org/x/oauth2"
 )
 
 type WebServerOptions struct {
-	Mongo      *mongo.MongoStorage
-	AuthConfig *oauth2.Config
+	Spotify *spotify.SpotifyProvider
 }
 
 type WebServer struct {
-	server     *echo.Echo
-	mongo      *mongo.MongoStorage
-	authConfig *oauth2.Config
+	server  *echo.Echo
+	spotify *spotify.SpotifyProvider
 }
 
 func New(opts WebServerOptions) *WebServer {
@@ -25,9 +22,8 @@ func New(opts WebServerOptions) *WebServer {
 	e.Use(middleware.Recover())
 
 	webServer := &WebServer{
-		server:     e,
-		mongo:      opts.Mongo,
-		authConfig: opts.AuthConfig,
+		server:  e,
+		spotify: opts.Spotify,
 	}
 
 	e.GET("/", webServer.Index)

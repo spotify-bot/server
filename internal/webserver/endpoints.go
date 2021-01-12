@@ -1,11 +1,10 @@
 package webserver
 
 import (
-	"context"
-	"golang.org/x/oauth2"
 	"net/http"
 	"time"
 
+	"github.com/koskalak/mamal/internal/spotify"
 	"github.com/labstack/echo/v4"
 )
 
@@ -33,21 +32,20 @@ func (s *WebServer) SpotifyCallback(c echo.Context) error {
 	if err != nil {
 		s.server.Logger.Panic(err)
 	}
-	platform := platformCookie.Value
-	userID := userCookie.Value
-	authCode := c.QueryParam("code")
 
-	ctx := context.Background() //FIXME
-	token, err := s.authConfig.Exchange(ctx, authCode)
-	if err != nil {
-		s.server.Logger.Fatal(err)
+	var oathPlatform spotify.OauthPlatform
+	switch platform := platformCookie.Value; platform {
+	case "telegram":
+		oathPlatform = spotify.PlatformTelegram
+	default:
+		s.server.Logger.Panic("Unsupported Platform")
 	}
 
-	client := s.authConfig.Client(ctx, token)
-	client.Get("...") //FIXME
-	//TODO strore to DB
+	userID := userCookie.Value
+	authCode := c.QueryParam("code")
+	s.spotify.AddUser(authCode, oathPlatform, userID) //TODO get error
 
-	return c.String(http.StatusOK, platform+"\n"+userID+"\n"+token.AccessToken)
+	return c.String(200, "Authentication Successful")
 }
 
 func (s *WebServer) TelegramAuth(c echo.Context) error {
@@ -70,7 +68,7 @@ func (s *WebServer) TelegramAuth(c echo.Context) error {
 	platformCookie.Expires = time.Now().Add(1 * time.Hour)
 	c.SetCookie(platformCookie)
 
-	url := s.authConfig.AuthCodeURL("state", oauth2.AccessTypeOffline)
+	url := s.spotify.GetAuthURL()
 	c.Redirect(http.StatusFound, url)
 	return nil
 }
