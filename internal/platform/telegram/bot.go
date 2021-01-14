@@ -76,7 +76,7 @@ func (tb *TGBot) processCommand(update *tgbotapi.Update) {
 func (tb *TGBot) processDirectMessage(update *tgbotapi.Update) {
 	log.Printf("Message from [%s]:  %s\n", update.Message.From.UserName, update.Message.Text)
 
-	txt := "Please use the following link for auth: \n" + config.AppConfig.Webserver.Address + "/auth/telegram?user_id=" + strconv.Itoa(update.Message.From.ID) //FIXME change to user_ID
+	txt := "Please use the following link for auth: \n" + config.AppConfig.Spotify.ApiServerAddress + "/auth/telegram?user_id=" + strconv.Itoa(update.Message.From.ID) //FIXME change to user_ID
 	msg := tgbotapi.NewMessage(update.Message.Chat.ID, txt)
 
 	tb.bot.Send(msg)

@@ -1,0 +1,7 @@
+FROM alpine
+
+ARG BINARY
+
+COPY build/$BINARY cmd/$BINARY
+
+WORKDIR /cmd

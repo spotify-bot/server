@@ -18,7 +18,7 @@ func main() {
 		ClientSecret: config.AppConfig.Spotify.SpotifyClientSecret,
 		Scopes:       []string{"user-read-currently-playing"},
 		Endpoint:     spotifyOauth.Endpoint,
-		RedirectURL:  "http://" + config.AppConfig.Webserver.Address + "/auth/callback", //FIXME
+		RedirectURL:  "http://" + config.AppConfig.Spotify.ApiServerAddress + "/auth/callback", //FIXME
 	}
 
 	s, err := spotify.New(ctx, spotify.ProviderOptions{
