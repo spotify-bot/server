@@ -7,14 +7,12 @@ deps:
 
 build: build.telegram build.webserver
 
-build.telegram:
+build.telegram: deps
 	env GOOS=linux GOARCH=amd64 go build -o build/telegram $(TELEGRAM_CMD)
 
-build.webserver:
+build.webserver: deps
 	env GOOS=linux GOARCH=amd64 go build -o build/webserver $(WEBSERVER_CMD)
 
 build.docker:
 	docker build -t telegram --build-arg CMD=telegram . 
 	docker build -t webserver --build-arg CMD=webserver .
-
-
