@@ -13,8 +13,8 @@ build.telegram:
 build.webserver:
 	env GOOS=linux GOARCH=amd64 go build -o build/webserver $(WEBSERVER_CMD)
 
-build.docker: build
-	docker build -t telegram --build-arg BINARY=telegram . 
-	docker build -t webserver --build-arg BINARY=webserver .
+build.docker:
+	docker build -t telegram --build-arg CMD=telegram . 
+	docker build -t webserver --build-arg CMD=webserver .
 
 
