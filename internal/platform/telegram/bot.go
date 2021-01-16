@@ -70,7 +70,9 @@ func (tb *TGBot) processCommand(update *tgbotapi.Update) {
 	default:
 		msg.Text = "I don't know that command"
 	}
-	tb.bot.Send(msg)
+	if _, err := tb.bot.Send(msg); err != nil {
+		log.Fatal("Failed to send message ", err)
+	}
 }
 
 func (tb *TGBot) processDirectMessage(update *tgbotapi.Update) {
@@ -79,7 +81,9 @@ func (tb *TGBot) processDirectMessage(update *tgbotapi.Update) {
 	txt := "Please use the following link for auth: \n" + config.AppConfig.Webserver.Address + "/auth/telegram?user_id=" + strconv.Itoa(update.Message.From.ID) //FIXME change to user_ID
 	msg := tgbotapi.NewMessage(update.Message.Chat.ID, txt)
 
-	tb.bot.Send(msg)
+	if _, err := tb.bot.Send(msg); err != nil {
+		log.Fatal("Failed to send message ", err)
+	}
 }
 
 func (tb *TGBot) processInlineQuery(update *tgbotapi.Update) {
@@ -105,6 +109,3 @@ func (tb *TGBot) processInlineQuery(update *tgbotapi.Update) {
 		log.Println("Failed to answer inline query: ", err)
 	}
 }
-
-func getMessage(user_id string)                   {} //Get link for song from spotify.
-func shareMessage(message string, chat_id string) {} //share message to recipient.

@@ -1,9 +1,9 @@
 package config
 
 import (
-	"fmt"
 	flag "github.com/spf13/pflag"
 	"github.com/spf13/viper"
+	"log"
 )
 
 var (
@@ -30,14 +30,12 @@ func loadConfig(configStruct interface{}) {
 
 	err := viperInstance.ReadInConfig()
 	if err != nil {
-		errorString := fmt.Sprintln("failed to read '%v' (err: %v)\n", ConfigPath, err)
-		panic(errorString)
+		log.Panic("failed to read Config")
 	}
 
 	err = viperInstance.Unmarshal(configStruct)
 	if err != nil {
-		errorString := fmt.Sprintln("failed to unmarshal '%v' (err: %v)\n", ConfigPath, err)
-		panic(errorString)
+		log.Panic("failed to unmarshal Config file")
 	}
-	fmt.Printf("loaded config: %v\n", ConfigPath)
+	log.Printf("loaded config: %v\n", ConfigPath)
 }
