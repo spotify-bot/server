@@ -51,9 +51,6 @@ func (s *SpotifyProvider) AddUser(code string, platform OauthPlatform, userID st
 		return err
 	}
 
-	client := s.authConfig.Client(ctx, token)
-	client.Get("...") //FIXME
-
 	mongoRow := mongo.OAuthToken{
 		AccessToken:  token.AccessToken,
 		RefreshToken: token.RefreshToken,
@@ -91,10 +88,13 @@ func (s *SpotifyProvider) GetRecentlyPlayed(platform OauthPlatform, userID strin
 func getRecentlyPlayedSongLink(client *http.Client) (*Item, error) {
 	resp, err := client.Get(RecentlyPlayedEndpoint)
 	if err != nil {
-		return nil, nil
+		return nil, err
 	}
 	defer resp.Body.Close()
 	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
 
 	var response Response
 	if err = json.Unmarshal(body, &response); err != nil {
