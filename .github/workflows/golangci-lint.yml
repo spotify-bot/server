@@ -13,4 +13,4 @@ jobs:
         with:
           version: v1.29
           args:
-            disable: errcheck
+            - --disable errcheck
