@@ -95,7 +95,6 @@ func getRecentlyPlayedSongLink(client *http.Client) (*Item, error) {
 	}
 	defer resp.Body.Close()
 	body, err := ioutil.ReadAll(resp.Body)
-	log.Println("kirekharrrrrrr ", body)
 
 	var response Response
 	if err = json.Unmarshal(body, &response); err != nil {
