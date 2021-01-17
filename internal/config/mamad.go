@@ -17,6 +17,7 @@ type TelegramBot struct {
 }
 
 type Spotify struct {
+	ApiServerAddress    string `mapstructure:"apiServerAddress"`
 	SpotifyClientID     string `mapstructure:"clientID"`
 	SpotifyClientSecret string `mapstructure:"clientSecret"`
 }

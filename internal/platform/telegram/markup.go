@@ -7,7 +7,7 @@ import (
 
 func getAuthMessage(userID string) tgbotapi.InlineKeyboardMarkup {
 
-	link := "http://" + config.AppConfig.Webserver.Address + "/auth/telegram?user_id=" + userID //FIXME dev config
+	link := "http://" + config.AppConfig.Spotify.ApiServerAddress + "/auth/telegram?user_id=" + userID //FIXME dev config
 	return tgbotapi.NewInlineKeyboardMarkup(
 		tgbotapi.NewInlineKeyboardRow(
 			tgbotapi.NewInlineKeyboardButtonURL("Login to Spotify", link),
