@@ -18,11 +18,11 @@ jobs:
         with:
           username: ${{ secrets.AWS_REGISTRY_USERNAME }}
           password: ${{ secrets.AWS_REGISTRY_TOKEN }}
+          registry: 685346772984.dkr.ecr.eu-west-1.amazonaws.com
       -
         name: Push Telegram Bot to GitHub Packages
         uses: docker/build-push-action@v2
         with:
-          registry: 685346772984.dkr.ecr.eu-west-1.amazonaws.com
           repository: 685346772984.dkr.ecr.eu-west-1.amazonaws.com
           tags: 685346772984.dkr.ecr.eu-west-1.amazonaws.com/mamal:telegram
           tag_with_sha: true
