@@ -9,6 +9,18 @@ jobs:
       - 
         name: Check out the repo
         uses: actions/checkout@v2
+      -
+        name: Push Telegram Bot to GitHub Packages
+        uses: docker/build-push-action@v2
+        with:
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+          registry: docker.pkg.github.com
+          repository: ${{ github.repository }}/octo-image
+          tag_with_sha: true
+          tag_with_ref: true
+          build-args: |
+            CMD=telegram
       - 
         name: Push webserver to GitHub Packages
         uses: docker/build-push-action@v2
@@ -21,15 +33,3 @@ jobs:
           push: true
           build-args: |
             CMD=webserver
-      -
-        name: Push Telegram Bot to GitHub Packages
-        uses: docker/build-push-action@v2
-        with:
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-          registry: docker.pkg.github.com
-          repository: koskalak/mamal/telegram
-          tags: telegram:latest
-          push: true
-          build-args: |
-            CMD=telegram
