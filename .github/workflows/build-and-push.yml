@@ -1,0 +1,35 @@
+name: Publish Docker image
+on:
+  push:
+    branch: master
+jobs:
+  push_to_registry:
+    runs-on: ubuntu-latest
+    steps:
+      - 
+        name: Check out the repo
+        uses: actions/checkout@v2
+      - 
+        name: Push webserver to GitHub Packages
+        uses: docker/build-push-action@v2
+        with:
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+          registry: docker.pkg.github.com
+          repository: koskalak/mamal/webserver
+          tag_with_ref: true
+          push: true
+          build-args: |
+            CMD=webserver
+      -
+        name: Push Telegram Bot to GitHub Packages
+        uses: docker/build-push-action@v2
+        with:
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+          registry: docker.pkg.github.com
+          repository: koskalak/mamal/telegram
+          tag_with_ref: true
+          push: true
+          build-args: |
+            CMD=telegram
