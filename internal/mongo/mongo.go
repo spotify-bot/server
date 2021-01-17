@@ -60,10 +60,12 @@ func (m *MongoStorage) UpsertOAuthToken(ctx context.Context, token OAuthToken) e
 	collection := m.database.Collection(OAuthTokenCollection)
 
 	filter := bson.D{
-		{"platform", token.Platform},
-		{"user_id", token.UserID},
+		primitive.E{Key: "platform", Value: token.Platform},
+		primitive.E{Key: "user_id", Value: token.UserID},
 	}
-	update := bson.D{{"$set", token}}
+	update := bson.D{
+		primitive.E{Key: "$set", Value: token},
+	}
 	opts := options.Update().SetUpsert(true)
 
 	_, err := collection.UpdateOne(ctx, filter, update, opts)
@@ -78,8 +80,8 @@ func (m *MongoStorage) GetOAuthTokenByUserID(ctx context.Context, userID string,
 	collection := m.database.Collection(OAuthTokenCollection)
 
 	filter := bson.D{
-		{"platform", platform},
-		{"user_id", userID},
+		primitive.E{Key: "platform", Value: platform},
+		primitive.E{Key: "user_id", Value: userID},
 	}
 
 	result := new(OAuthToken)

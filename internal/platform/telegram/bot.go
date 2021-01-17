@@ -105,6 +105,3 @@ func (tb *TGBot) processInlineQuery(update *tgbotapi.Update) {
 		log.Println("Failed to answer inline query: ", err)
 	}
 }
-
-func getMessage(user_id string)                   {} //Get link for song from spotify.
-func shareMessage(message string, chat_id string) {} //share message to recipient.
