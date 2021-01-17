@@ -19,6 +19,7 @@ jobs:
           repository: ${{ github.repository }}/telegram
           tag_with_sha: true
           tag_with_ref: true
+          push: true
           build-args: |
             CMD=telegram
       - 
@@ -28,8 +29,9 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
           registry: docker.pkg.github.com
-          repository: koskalak/mamal/webserver
-          tags: telegram:latest
+          repository: ${{ github.repository }}/telegram
+          tag_with_sha: true
+          tag_with_ref: true
           push: true
           build-args: |
             CMD=webserver
