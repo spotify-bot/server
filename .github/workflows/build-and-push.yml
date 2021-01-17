@@ -15,8 +15,9 @@ jobs:
         with:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-          registry: docker.pkg.github.com
-          repository: ${{ github.repository }}/telegram
+          registry: 685346772984.dkr.ecr.eu-west-1.amazonaws.com
+          repository: 685346772984.dkr.ecr.eu-west-1.amazonaws.com
+          tags: 685346772984.dkr.ecr.eu-west-1.amazonaws.com/mamal:telegram
           tag_with_sha: true
           tag_with_ref: true
           push: true
@@ -28,8 +29,9 @@ jobs:
         with:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-          registry: docker.pkg.github.com
-          repository: ${{ github.repository }}/telegram
+          registry: 685346772984.dkr.ecr.eu-west-1.amazonaws.com
+          repository: 685346772984.dkr.ecr.eu-west-1.amazonaws.com
+          tags: 685346772984.dkr.ecr.eu-west-1.amazonaws.com/mamal:webserver
           tag_with_sha: true
           tag_with_ref: true
           push: true
