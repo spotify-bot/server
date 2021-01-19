@@ -13,7 +13,23 @@ type Response struct {
 }
 
 type Item struct {
+	Name  string `json:"name"`
+	ID    string `json:"id"`
+	Type  string `json:"type"`
+	Album Album  `json:"album"`
+}
+
+type Album struct {
+	Artists []Artist `json:"artists"`
+	Images  []Image  `json:"images"`
+}
+
+type Artist struct {
 	Name string `json:"name"`
-	ID   string `json:"id"`
-	Type string `json:"type"`
+}
+
+type Image struct {
+	URL    string `json:"url"`
+	Height int    `json:"height"`
+	Width  int    `json:"width"`
 }

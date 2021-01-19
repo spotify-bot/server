@@ -2,6 +2,7 @@ package telegram
 
 import (
 	"github.com/koskalak/mamal/internal/config"
+	"github.com/koskalak/mamal/internal/spotify"
 	tgbotapi "github.com/mohammadkarimi23/telegram-bot-api/v5"
 )
 
@@ -15,14 +16,19 @@ func getAuthMessage(userID string) tgbotapi.InlineKeyboardMarkup {
 	)
 }
 
-func getTrackQueryResult(id, title, url, messageText string) tgbotapi.InlineQueryResultArticle {
+func getTrackQueryResult(id string, track *spotify.Item) tgbotapi.InlineQueryResultArticle {
+	trackLink := spotify.OpenSpotifyTrackEndpoint + track.ID
 	return tgbotapi.InlineQueryResultArticle{
 		Type:  "article",
 		ID:    id,
-		Title: title,
-		URL:   url,
+		Title: track.Name,
+		URL:   trackLink,
 		InputMessageContent: tgbotapi.InputTextMessageContent{
-			Text: messageText,
+			Text: trackLink,
 		},
+		ThumbURL:    track.Album.Images[2].URL, //FIXME use smallest image
+		ThumbWidth:  track.Album.Images[2].Width,
+		ThumbHeight: track.Album.Images[2].Height,
+		Description: track.Album.Artists[0].Name, //FIXME
 	}
 }
