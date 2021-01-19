@@ -100,8 +100,7 @@ func (tb *TGBot) processInlineQuery(update *tgbotapi.Update) {
 		inlineConf.SwitchPMText = "Login to Spotify"
 		inlineConf.SwitchPMParameter = "auth"
 	} else {
-		songLink := spotify.OpenSpotifyTrackEndpoint + rp.ID
-		article := getTrackQueryResult(update.InlineQuery.ID, rp.Name, songLink, songLink)
+		article := getTrackQueryResult(update.InlineQuery.ID, rp)
 		inlineConf.Results = []interface{}{article}
 	}
 
