@@ -16,5 +16,5 @@ RUN	env GOOS=$OS GOARCH=$ARCH go build -o build/$CMD github.com/koskalak/mamal/c
 
 FROM alpine:3.12 as app
 
-WORKDIR /root/
-COPY --from=builder /app/build/$CMD /usr/bin/
+WORKDIR /app
+COPY --from=builder /app/build/$CMD /app
