@@ -30,7 +30,7 @@ func loadConfig(configStruct interface{}) {
 
 	err := viperInstance.ReadInConfig()
 	if err != nil {
-		log.Panic("failed to read Config")
+		log.Panic("failed to read Config, ", err)
 	}
 
 	err = viperInstance.Unmarshal(configStruct)
