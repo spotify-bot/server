@@ -67,7 +67,7 @@ func (s *SpotifyProvider) AddUser(code string, platform OauthPlatform, userID st
 	return nil
 }
 
-func (s *SpotifyProvider) GetRecentlyPlayed(platform OauthPlatform, userID string) (track *Item, err error) {
+func (s *SpotifyProvider) GetRecentlyPlayed(platform OauthPlatform, userID string) (track *Track, err error) {
 	ctx := context.Background()
 	mongoToken, err := s.db.GetOAuthTokenByUserID(ctx, userID, string(platform))
 	if err != nil {
@@ -81,12 +81,16 @@ func (s *SpotifyProvider) GetRecentlyPlayed(platform OauthPlatform, userID strin
 		Expiry:       mongoToken.Expiry,
 	}
 	client := s.authConfig.Client(ctx, token)
-	track, err = getRecentlyPlayedSongLink(client)
+	track, err = getCurrentlyPlayingSong(client)
+	if err != nil {
+		log.Println("no song currently playing")
+		track, err = getRecentlyPlayedSong(client)
+	}
 	return
 }
 
-func getRecentlyPlayedSongLink(client *http.Client) (*Item, error) {
-	resp, err := client.Get(RecentlyPlayedEndpoint)
+func getCurrentlyPlayingSong(client *http.Client) (*Track, error) {
+	resp, err := client.Get(CurrentlyPlayingEndpoint)
 	if err != nil {
 		return nil, err
 	}
@@ -96,9 +100,29 @@ func getRecentlyPlayedSongLink(client *http.Client) (*Item, error) {
 		return nil, err
 	}
 
-	var response Response
+	var response CurrentlyPlayingResponse
+	if err = json.Unmarshal(body, &response); err != nil {
+		log.Println("No song playing atm, fetching recently played")
+		return nil, err
+	}
+	return &response.Track, nil
+}
+
+func getRecentlyPlayedSong(client *http.Client) (*Track, error) {
+
+	resp, err := client.Get(RecentlyPlayedEndpoint + "?limit=1") //FIXME
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	var response RecentlyPlayedResponse
 	if err = json.Unmarshal(body, &response); err != nil {
 		return nil, err
 	}
-	return &response.Item, nil
+	return &response.Items[0].Track, nil
 }

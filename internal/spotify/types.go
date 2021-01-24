@@ -4,15 +4,24 @@ type OauthPlatform string
 
 const (
 	OpenSpotifyTrackEndpoint               = "https://open.spotify.com/track/"
-	RecentlyPlayedEndpoint                 = "https://api.spotify.com/v1/me/player/currently-playing"
+	CurrentlyPlayingEndpoint               = "https://api.spotify.com/v1/me/player/currently-playing"
+	RecentlyPlayedEndpoint                 = "https://api.spotify.com/v1/me/player/recently-played"
 	PlatformTelegram         OauthPlatform = "telegram"
 )
 
-type Response struct {
-	Item Item `json:"item"`
+type CurrentlyPlayingResponse struct {
+	Track Track `json:"item"` // Spotify API returns a single item on currently playing but consists of track
+}
+
+type RecentlyPlayedResponse struct {
+	Items []Item `json:"items"`
 }
 
 type Item struct {
+	Track Track `json:"track"`
+}
+
+type Track struct {
 	Name  string `json:"name"`
 	ID    string `json:"id"`
 	Type  string `json:"type"`

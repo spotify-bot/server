@@ -16,7 +16,7 @@ func getAuthMessage(userID string) tgbotapi.InlineKeyboardMarkup {
 	)
 }
 
-func getTrackQueryResult(id string, track *spotify.Item) tgbotapi.InlineQueryResultArticle {
+func getTrackQueryResult(id string, track *spotify.Track) tgbotapi.InlineQueryResultArticle {
 	trackLink := spotify.OpenSpotifyTrackEndpoint + track.ID
 	return tgbotapi.InlineQueryResultArticle{
 		Type:  "article",
