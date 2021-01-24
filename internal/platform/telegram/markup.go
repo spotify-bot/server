@@ -26,9 +26,9 @@ func getTrackQueryResult(id string, track *spotify.Item) tgbotapi.InlineQueryRes
 		InputMessageContent: tgbotapi.InputTextMessageContent{
 			Text: trackLink,
 		},
-		ThumbURL:    track.Album.Images[2].URL, //FIXME use smallest image
-		ThumbWidth:  track.Album.Images[2].Width,
-		ThumbHeight: track.Album.Images[2].Height,
+		ThumbURL:    track.Album.Images[1].URL, //FIXME use smallest image
+		ThumbWidth:  track.Album.Images[1].Width,
+		ThumbHeight: track.Album.Images[1].Height,
 		Description: track.Album.Artists[0].Name, //FIXME
 	}
 }
