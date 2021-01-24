@@ -83,7 +83,6 @@ func (s *SpotifyProvider) GetRecentlyPlayed(platform OauthPlatform, userID strin
 	client := s.authConfig.Client(ctx, token)
 	track, err = getCurrentlyPlayingSong(client)
 	if err != nil {
-		log.Println("no song currently playing")
 		track, err = getRecentlyPlayedSong(client)
 	}
 	return
@@ -102,7 +101,6 @@ func getCurrentlyPlayingSong(client *http.Client) (*Track, error) {
 
 	var response CurrentlyPlayingResponse
 	if err = json.Unmarshal(body, &response); err != nil {
-		log.Println("No song playing atm, fetching recently played")
 		return nil, err
 	}
 	return &response.Track, nil
