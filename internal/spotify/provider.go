@@ -68,6 +68,24 @@ func (s *SpotifyProvider) AddUser(code string, platform OauthPlatform, userID st
 }
 
 func (s *SpotifyProvider) GetRecentlyPlayed(platform OauthPlatform, userID string) (track *Track, err error) {
+	client, err := s.getUserClient(platform, userID)
+	track, err = getCurrentlyPlayingSong(client)
+	if err != nil {
+		track, err = getRecentlyPlayedSong(client)
+	}
+	return
+}
+
+func (s *SpotifyProvider) AddSongToQueue(platform OauthPlatform, userID, songURI string) (err error) {
+	client, err := s.getUserClient(platform, userID)
+	if err != nil {
+		err = addSongToQueue(client, songURI)
+	}
+	return
+}
+
+func (s *SpotifyProvider) getUserClient(platform OauthPlatform, userID string) (client *http.Client, err error) {
+
 	ctx := context.Background()
 	mongoToken, err := s.db.GetOAuthTokenByUserID(ctx, userID, string(platform))
 	if err != nil {
@@ -80,11 +98,7 @@ func (s *SpotifyProvider) GetRecentlyPlayed(platform OauthPlatform, userID strin
 		TokenType:    mongoToken.TokenType,
 		Expiry:       mongoToken.Expiry,
 	}
-	client := s.authConfig.Client(ctx, token)
-	track, err = getCurrentlyPlayingSong(client)
-	if err != nil {
-		track, err = getRecentlyPlayedSong(client)
-	}
+	client = s.authConfig.Client(ctx, token)
 	return
 }
 
@@ -123,4 +137,11 @@ func getRecentlyPlayedSong(client *http.Client) (*Track, error) {
 		return nil, err
 	}
 	return &response.Items[0].Track, nil
+}
+
+func addSongToQueue(client *http.Client, songURI string) error {
+	if resp, err := client.Get(AddToQueueEndpoint + "?uri=" + songURI); err != nil && resp.StatusCode != http.StatusNoContent {
+		return err
+	}
+	return nil
 }
