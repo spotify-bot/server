@@ -70,6 +70,9 @@ func (s *SpotifyProvider) AddUser(code string, platform OauthPlatform, userID st
 
 func (s *SpotifyProvider) GetRecentlyPlayed(platform OauthPlatform, userID string) (track *Track, err error) {
 	client, err := s.getUserClient(platform, userID)
+	if err != nil {
+		return
+	}
 	track, err = getCurrentlyPlayingSong(client)
 	if err != nil {
 		track, err = getRecentlyPlayedSong(client)
@@ -143,6 +146,9 @@ func getRecentlyPlayedSong(client *http.Client) (*Track, error) {
 
 func addSongToQueue(client *http.Client, songURI string) error {
 	req, err := http.NewRequest("POST", AddToQueueEndpoint+"?uri="+songURI, nil)
+	if err != nil {
+		return err
+	}
 	resp, err := client.Do(req)
 	if err != nil {
 		return err
