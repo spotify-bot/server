@@ -18,14 +18,19 @@ func getAuthMessage(userID string) tgbotapi.InlineKeyboardMarkup {
 
 func getTrackQueryResult(id string, track *spotify.Track) tgbotapi.InlineQueryResultArticle {
 	trackLink := spotify.OpenSpotifyTrackEndpoint + track.ID
+	replyMarkup := tgbotapi.NewInlineKeyboardMarkup(
+		tgbotapi.NewInlineKeyboardRow(
+			tgbotapi.NewInlineKeyboardButtonData("Add to queue", track.ID),
+		),
+	)
 	return tgbotapi.InlineQueryResultArticle{
 		Type:  "article",
 		ID:    id,
 		Title: track.Name,
-		URL:   trackLink,
 		InputMessageContent: tgbotapi.InputTextMessageContent{
 			Text: trackLink,
 		},
+		ReplyMarkup: &replyMarkup,
 		ThumbURL:    track.Album.Images[1].URL, //FIXME use smallest image
 		ThumbWidth:  track.Album.Images[1].Width,
 		ThumbHeight: track.Album.Images[1].Height,

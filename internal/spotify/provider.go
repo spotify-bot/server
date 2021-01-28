@@ -3,6 +3,7 @@ package spotify
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"github.com/koskalak/mamal/internal/mongo"
 	"golang.org/x/oauth2"
 	"io/ioutil"
@@ -79,14 +80,15 @@ func (s *SpotifyProvider) GetRecentlyPlayed(platform OauthPlatform, userID strin
 func (s *SpotifyProvider) AddSongToQueue(platform OauthPlatform, userID, songURI string) (err error) {
 	client, err := s.getUserClient(platform, userID)
 	if err != nil {
-		err = addSongToQueue(client, songURI)
+		return
 	}
+	err = addSongToQueue(client, songURI)
 	return
 }
 
 func (s *SpotifyProvider) getUserClient(platform OauthPlatform, userID string) (client *http.Client, err error) {
 
-	ctx := context.Background()
+	ctx := context.Background() //TODO add timeout
 	mongoToken, err := s.db.GetOAuthTokenByUserID(ctx, userID, string(platform))
 	if err != nil {
 		return
@@ -140,8 +142,14 @@ func getRecentlyPlayedSong(client *http.Client) (*Track, error) {
 }
 
 func addSongToQueue(client *http.Client, songURI string) error {
-	if resp, err := client.Get(AddToQueueEndpoint + "?uri=" + songURI); err != nil && resp.StatusCode != http.StatusNoContent {
+	req, err := http.NewRequest("POST", AddToQueueEndpoint+"?uri="+songURI, nil)
+	resp, err := client.Do(req)
+	if err != nil {
 		return err
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode != http.StatusNoContent {
+		return fmt.Errorf("request error code: %d", resp.StatusCode)
 	}
 	return nil
 }
