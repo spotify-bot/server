@@ -20,6 +20,7 @@ func main() {
 		Scopes: []string{
 			"user-read-currently-playing",
 			"user-read-recently-played",
+			"user-modify-playback-state",
 		},
 		Endpoint:    spotifyOauth.Endpoint,
 		RedirectURL: "http://" + config.AppConfig.Spotify.ApiServerAddress + "/auth/callback", //FIXME

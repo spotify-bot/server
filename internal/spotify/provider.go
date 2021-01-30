@@ -3,6 +3,7 @@ package spotify
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"github.com/koskalak/mamal/internal/mongo"
 	"golang.org/x/oauth2"
 	"io/ioutil"
@@ -68,7 +69,29 @@ func (s *SpotifyProvider) AddUser(code string, platform OauthPlatform, userID st
 }
 
 func (s *SpotifyProvider) GetRecentlyPlayed(platform OauthPlatform, userID string) (track *Track, err error) {
-	ctx := context.Background()
+	client, err := s.getUserClient(platform, userID)
+	if err != nil {
+		return
+	}
+	track, err = getCurrentlyPlayingSong(client)
+	if err != nil {
+		track, err = getRecentlyPlayedSong(client)
+	}
+	return
+}
+
+func (s *SpotifyProvider) AddSongToQueue(platform OauthPlatform, userID, songURI string) (err error) {
+	client, err := s.getUserClient(platform, userID)
+	if err != nil {
+		return
+	}
+	err = addSongToQueue(client, songURI)
+	return
+}
+
+func (s *SpotifyProvider) getUserClient(platform OauthPlatform, userID string) (client *http.Client, err error) {
+
+	ctx := context.Background() //TODO add timeout
 	mongoToken, err := s.db.GetOAuthTokenByUserID(ctx, userID, string(platform))
 	if err != nil {
 		return
@@ -80,11 +103,7 @@ func (s *SpotifyProvider) GetRecentlyPlayed(platform OauthPlatform, userID strin
 		TokenType:    mongoToken.TokenType,
 		Expiry:       mongoToken.Expiry,
 	}
-	client := s.authConfig.Client(ctx, token)
-	track, err = getCurrentlyPlayingSong(client)
-	if err != nil {
-		track, err = getRecentlyPlayedSong(client)
-	}
+	client = s.authConfig.Client(ctx, token)
 	return
 }
 
@@ -123,4 +142,20 @@ func getRecentlyPlayedSong(client *http.Client) (*Track, error) {
 		return nil, err
 	}
 	return &response.Items[0].Track, nil
+}
+
+func addSongToQueue(client *http.Client, songURI string) error {
+	req, err := http.NewRequest("POST", AddToQueueEndpoint+"?uri="+songURI, nil)
+	if err != nil {
+		return err
+	}
+	resp, err := client.Do(req)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode != http.StatusNoContent {
+		return fmt.Errorf("request error code: %d", resp.StatusCode)
+	}
+	return nil
 }

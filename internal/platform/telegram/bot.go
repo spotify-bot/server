@@ -49,6 +49,8 @@ func (tb *TGBot) Start() {
 			} else {
 				tb.processDirectMessage(&update)
 			}
+		} else if update.CallbackQuery != nil {
+			tb.processCallbackQuery(&update)
 		} else {
 			continue
 		}
@@ -105,6 +107,28 @@ func (tb *TGBot) processInlineQuery(update *tgbotapi.Update) {
 	}
 
 	if _, err := tb.bot.AnswerInlineQuery(inlineConf); err != nil {
+		log.Println("Failed to answer inline query: ", err)
+	}
+}
+
+func (tb *TGBot) processCallbackQuery(update *tgbotapi.Update) {
+
+	trackURI := spotify.TrackURIPrefix + update.CallbackQuery.Data
+	callbackMessage := ""
+	callbackConf := tgbotapi.CallbackConfig{
+		CallbackQueryID: update.CallbackQuery.ID,
+	}
+	err := tb.spotify.AddSongToQueue(spotify.PlatformTelegram, strconv.Itoa(update.CallbackQuery.From.ID), trackURI)
+	if err != nil {
+		callbackMessage = "Failed to add song to queue"
+		log.Println("Failed to add song to queue: ", err)
+	} else {
+		callbackMessage = "Song added to queue"
+	}
+
+	callbackConf.Text = callbackMessage
+
+	if _, err := tb.bot.AnswerCallbackQuery(callbackConf); err != nil {
 		log.Println("Failed to answer inline query: ", err)
 	}
 }
