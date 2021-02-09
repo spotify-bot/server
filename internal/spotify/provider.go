@@ -113,6 +113,12 @@ func getCurrentlyPlayingSong(client *http.Client) (*Track, error) {
 		return nil, err
 	}
 	defer resp.Body.Close()
+	if resp.StatusCode != http.StatusOK {
+		return nil, CallbackError{
+			CurrentlyPlayingEndpoint,
+			resp.StatusCode,
+		}
+	}
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		return nil, err
