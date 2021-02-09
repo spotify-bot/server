@@ -1,6 +1,7 @@
 package spotify
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
@@ -89,6 +90,14 @@ func (s *SpotifyProvider) AddSongToQueue(platform OauthPlatform, userID, songURI
 	return
 }
 
+func (s *SpotifyProvider) PlaySong(platform OauthPlatform, userID, songURI string) (err error) {
+	client, err := s.getUserClient(platform, userID)
+	if err != nil {
+		return
+	}
+	err = playSong(client, songURI)
+	return
+}
 func (s *SpotifyProvider) getUserClient(platform OauthPlatform, userID string) (client *http.Client, err error) {
 
 	ctx := context.Background() //TODO add timeout
@@ -152,6 +161,24 @@ func getRecentlyPlayedSong(client *http.Client) (*Track, error) {
 
 func addSongToQueue(client *http.Client, songURI string) error {
 	req, err := http.NewRequest("POST", AddToQueueEndpoint+"?uri="+songURI, nil)
+	if err != nil {
+		return err
+	}
+	resp, err := client.Do(req)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode != http.StatusNoContent {
+		return fmt.Errorf("request error code: %d", resp.StatusCode)
+	}
+	return nil
+}
+
+func playSong(client *http.Client, songURI string) error {
+
+	var jsonStr = []byte(`{"context_uri": "` + songURI + `"}`)
+	req, err := http.NewRequest("POST", PlaySongEndpoint, bytes.NewBuffer(jsonStr))
 	if err != nil {
 		return err
 	}
