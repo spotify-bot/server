@@ -1,5 +1,7 @@
 package spotify
 
+import "fmt"
+
 type OauthPlatform string
 
 const (
@@ -43,4 +45,13 @@ type Image struct {
 	URL    string `json:"url"`
 	Height int    `json:"height"`
 	Width  int    `json:"width"`
+}
+
+type CallbackError struct {
+	Endpoint string
+	Code     int
+}
+
+func (e CallbackError) Error() string {
+	return fmt.Sprintf("API call to %v failed with %v error", e.Endpoint, e.Code)
 }
