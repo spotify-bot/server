@@ -20,7 +20,10 @@ func getTrackQueryResult(id string, track *spotify.Track) tgbotapi.InlineQueryRe
 	trackLink := spotify.OpenSpotifyTrackEndpoint + track.ID
 	replyMarkup := tgbotapi.NewInlineKeyboardMarkup(
 		tgbotapi.NewInlineKeyboardRow(
-			tgbotapi.NewInlineKeyboardButtonData("Add to queue", track.ID),
+			tgbotapi.NewInlineKeyboardButtonData("Play Now", "1#"+track.ID),
+		),
+		tgbotapi.NewInlineKeyboardRow(
+			tgbotapi.NewInlineKeyboardButtonData("Add to Queue", "2#"+track.ID),
 		),
 	)
 	return tgbotapi.InlineQueryResultArticle{

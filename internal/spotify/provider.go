@@ -177,8 +177,8 @@ func addSongToQueue(client *http.Client, songURI string) error {
 
 func playSong(client *http.Client, songURI string) error {
 
-	var jsonStr = []byte(`{"context_uri": "` + songURI + `"}`)
-	req, err := http.NewRequest("POST", PlaySongEndpoint, bytes.NewBuffer(jsonStr))
+	var jsonStr = []byte(`{"uris":["` + songURI + `"]}`)
+	req, err := http.NewRequest("PUT", PlaySongEndpoint, bytes.NewBuffer(jsonStr))
 	if err != nil {
 		return err
 	}
