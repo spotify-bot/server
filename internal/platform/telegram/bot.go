@@ -7,6 +7,7 @@ import (
 	"github.com/koskalak/mamal/internal/spotify"
 	tgbotapi "github.com/mohammadkarimi23/telegram-bot-api/v5"
 	"strconv"
+	"strings"
 )
 
 type TGBot struct {
@@ -113,19 +114,42 @@ func (tb *TGBot) processInlineQuery(update *tgbotapi.Update) {
 
 func (tb *TGBot) processCallbackQuery(update *tgbotapi.Update) {
 
-	trackURI := spotify.TrackURIPrefix + update.CallbackQuery.Data
+	if !strings.Contains(update.CallbackQuery.Data, "#") {
+		log.Println("Unknown callback format")
+		return //TODO should send proper response to sender
+	}
+	splittedQuery := strings.SplitAfterN(update.CallbackQuery.Data, "#", 2)
+	trackURI := spotify.TrackURIPrefix + splittedQuery[1]
+	queryType, err := strconv.Atoi(strings.Trim(splittedQuery[0], "#"))
+	if err != nil {
+		log.Println("Unknown callback format:")
+		return //TODO should send proper response to sender
+	}
 	callbackMessage := ""
 	callbackConf := tgbotapi.CallbackConfig{
 		CallbackQueryID: update.CallbackQuery.ID,
 	}
-	err := tb.spotify.AddSongToQueue(spotify.PlatformTelegram, strconv.Itoa(update.CallbackQuery.From.ID), trackURI)
-	if err != nil {
-		callbackMessage = "Failed to add song to queue"
-		log.Println("Failed to add song to queue: ", err)
-	} else {
-		callbackMessage = "Song added to queue"
-	}
 
+	switch queryType {
+	case 1:
+		err := tb.spotify.PlaySong(spotify.PlatformTelegram, strconv.Itoa(update.CallbackQuery.From.ID), trackURI)
+		if err != nil {
+			callbackMessage = "Failed to play song"
+			log.Println("Failed to play song: ", err)
+		} else {
+			callbackMessage = "Enjoy!"
+		}
+	case 2:
+		err := tb.spotify.AddSongToQueue(spotify.PlatformTelegram, strconv.Itoa(update.CallbackQuery.From.ID), trackURI)
+		if err != nil {
+			callbackMessage = "Failed to add song to queue"
+			log.Println("Failed to add song to queue: ", err)
+		} else {
+			callbackMessage = "Song Added To Queue"
+		}
+	default:
+		log.Println("Callback Query type unknown")
+	}
 	callbackConf.Text = callbackMessage
 
 	if _, err := tb.bot.AnswerCallbackQuery(callbackConf); err != nil {
