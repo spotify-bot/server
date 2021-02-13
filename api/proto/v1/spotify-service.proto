@@ -1,0 +1,49 @@
+syntax = "proto3";
+package v1;
+
+import "google/protobuf/wrappers.proto";
+
+message UserData{
+    // Platform name (telegram, Slack etc.)
+    string platform = 1
+
+    // UserID in the platform
+    string userID = 2
+}
+
+message PlayTrackRequest{
+    UserData user = 1
+
+    // Spotify Track URI
+    string trackURI = 2
+}
+
+
+message Track {
+	string name = 1
+    string  uri = 2
+    Album album = 3
+}
+
+message Album {
+	repeated Artist artists = 1
+	Image image = 2
+}
+
+message Artist {
+	string name = 1
+}
+
+message Image {
+	string url = 1
+	int32 height = 2
+	int32 width = 3
+}
+
+
+service SpotifyService {
+    rpc getRecentlyPlayed(UserData) returns (Track);
+    rpc addSongToQueue(PlayTrackRequest) returns (google.protobuf.BoolValue);
+    rpc playSong(PlayTrackRequest) returns (google.protobuf.BoolValue);
+}
+
