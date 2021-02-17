@@ -11,6 +11,7 @@ const (
 	RecentlyPlayedEndpoint                 = "https://api.spotify.com/v1/me/player/recently-played"
 	AddToQueueEndpoint                     = "https://api.spotify.com/v1/me/player/queue"
 	PlaySongEndpoint                       = "https://api.spotify.com/v1/me/player/play"
+	SearchEndpoint                         = "https://api.spotify.com/v1/search"
 	PlatformTelegram         OauthPlatform = "telegram"
 )
 
@@ -20,6 +21,20 @@ type CurrentlyPlayingResponse struct {
 
 type RecentlyPlayedResponse struct {
 	Items []Item `json:"items"`
+}
+
+type SearchResponse struct {
+	Tracks SearchTrackResult `json:"tracks"`
+}
+
+type SearchTrackResult struct {
+	Items []SearchTrackItem `json:"items"`
+}
+
+type SearchTrackItem struct {
+	Artists []Artist `json:"artists"`
+	Name    string   `json:"name"`
+	ID      string   `json:"id"`
 }
 
 type Item struct {

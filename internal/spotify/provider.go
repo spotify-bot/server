@@ -10,6 +10,7 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"strconv"
 )
 
 type ProviderOptions struct {
@@ -191,4 +192,23 @@ func playSong(client *http.Client, songURI string) error {
 		return fmt.Errorf("request error code: %d", resp.StatusCode)
 	}
 	return nil
+}
+
+func searchTrack(client *http.Client, query string, limit, offset int) (*[]SearchTrackItem, error) {
+
+	resp, err := client.Get(SearchEndpoint + "?q=" + query + "&type=track&limit=" + strconv.Itoa(limit) + "&offset=" + strconv.Itoa(offset)) //FIXME
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	var response SearchResponse
+	if err = json.Unmarshal(body, &response); err != nil {
+		return nil, err
+	}
+	return &response.Tracks.Items, nil
 }
