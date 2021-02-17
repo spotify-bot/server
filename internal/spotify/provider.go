@@ -99,6 +99,19 @@ func (s *SpotifyProvider) PlaySong(platform OauthPlatform, userID, songURI strin
 	err = playSong(client, songURI)
 	return
 }
+
+func (s *SpotifyProvider) SearchSong(platform OauthPlatform, userID, query string, offset, limit int) (response *[]SearchTrackItem, err error) {
+	client, err := s.getUserClient(platform, userID)
+	if err != nil {
+		return
+	}
+	response, err = searchSong(client, query, limit, offset)
+	if err != nil {
+		return
+	}
+	return
+}
+
 func (s *SpotifyProvider) getUserClient(platform OauthPlatform, userID string) (client *http.Client, err error) {
 
 	ctx := context.Background() //TODO add timeout
@@ -194,7 +207,7 @@ func playSong(client *http.Client, songURI string) error {
 	return nil
 }
 
-func searchTrack(client *http.Client, query string, limit, offset int) (*[]SearchTrackItem, error) {
+func searchSong(client *http.Client, query string, limit, offset int) (*[]SearchTrackItem, error) {
 
 	resp, err := client.Get(SearchEndpoint + "?q=" + query + "&type=track&limit=" + strconv.Itoa(limit) + "&offset=" + strconv.Itoa(offset)) //FIXME
 	if err != nil {
