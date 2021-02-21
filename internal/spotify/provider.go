@@ -5,7 +5,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/koskalak/mamal/internal/mongo"
+	"github.com/spotify-bot/server/internal/mongo"
 	"golang.org/x/oauth2"
 	"io/ioutil"
 	"log"

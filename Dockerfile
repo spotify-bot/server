@@ -12,7 +12,7 @@ ENV HOME /app
 WORKDIR /app
 COPY . .
 RUN go mod download
-RUN	env GOOS=$OS GOARCH=$ARCH go build -o build/$CMD github.com/koskalak/mamal/cmd/$CMD
+RUN	env GOOS=$OS GOARCH=$ARCH go build -o build/$CMD github.com/spotify-bot/server/cmd/$CMD
 
 FROM alpine:3.12 as app
 

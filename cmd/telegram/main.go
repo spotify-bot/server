@@ -2,9 +2,9 @@ package main
 
 import (
 	"context"
-	"github.com/koskalak/mamal/internal/config"
-	"github.com/koskalak/mamal/internal/platform/telegram"
-	"github.com/koskalak/mamal/internal/spotify"
+	"github.com/spotify-bot/server/internal/config"
+	"github.com/spotify-bot/server/internal/platform/telegram"
+	"github.com/spotify-bot/server/internal/spotify"
 	"golang.org/x/oauth2"
 	spotifyOauth "golang.org/x/oauth2/spotify"
 	"log"

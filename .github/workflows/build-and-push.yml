@@ -24,7 +24,7 @@ jobs:
         uses: docker/build-push-action@v2
         with:
           repository: 685346772984.dkr.ecr.eu-west-1.amazonaws.com
-          tags: 685346772984.dkr.ecr.eu-west-1.amazonaws.com/mamal:telegram
+          tags: 685346772984.dkr.ecr.eu-west-1.amazonaws.com/server:telegram
           tag_with_sha: true
           tag_with_ref: true
           push: true
@@ -35,7 +35,7 @@ jobs:
         uses: docker/build-push-action@v2
         with:
           repository: 685346772984.dkr.ecr.eu-west-1.amazonaws.com
-          tags: 685346772984.dkr.ecr.eu-west-1.amazonaws.com/mamal:webserver
+          tags: 685346772984.dkr.ecr.eu-west-1.amazonaws.com/server:webserver
           tag_with_sha: true
           tag_with_ref: true
           push: true

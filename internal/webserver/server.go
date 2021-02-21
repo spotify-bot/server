@@ -1,7 +1,7 @@
 package webserver
 
 import (
-	"github.com/koskalak/mamal/internal/spotify"
+	"github.com/spotify-bot/server/internal/spotify"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 )

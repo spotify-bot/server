@@ -4,9 +4,9 @@ import (
 	"context"
 	"log"
 
-	"github.com/koskalak/mamal/internal/config"
-	"github.com/koskalak/mamal/internal/spotify"
-	"github.com/koskalak/mamal/internal/webserver"
+	"github.com/spotify-bot/server/internal/config"
+	"github.com/spotify-bot/server/internal/spotify"
+	"github.com/spotify-bot/server/internal/webserver"
 	"golang.org/x/oauth2"
 	spotifyOauth "golang.org/x/oauth2/spotify"
 )

@@ -4,7 +4,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/koskalak/mamal/internal/spotify"
+	"github.com/spotify-bot/server/internal/spotify"
 	"github.com/labstack/echo/v4"
 )
 

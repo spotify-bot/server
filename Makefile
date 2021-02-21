@@ -1,4 +1,4 @@
-MODULE := github.com/koskalak/mamal
+MODULE := github.com/spotify-bot/server
 TELEGRAM_CMD := $(MODULE)/cmd/telegram
 WEBSERVER_CMD := $(MODULE)/cmd/webserver
 

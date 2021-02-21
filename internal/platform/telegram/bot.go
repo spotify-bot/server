@@ -3,8 +3,8 @@ package telegram
 import (
 	"log"
 
-	"github.com/koskalak/mamal/internal/config"
-	"github.com/koskalak/mamal/internal/spotify"
+	"github.com/spotify-bot/server/internal/config"
+	"github.com/spotify-bot/server/internal/spotify"
 	tgbotapi "github.com/mohammadkarimi23/telegram-bot-api/v5"
 	"strconv"
 	"strings"
