@@ -1,11 +1,14 @@
 package webserver
 
 import (
+	"log"
 	"net/http"
+	"net/url"
+	"strings"
 	"time"
 
-	"github.com/spotify-bot/server/internal/spotify"
 	"github.com/labstack/echo/v4"
+	"github.com/spotify-bot/server/internal/spotify"
 )
 
 type IndexResponse struct {
@@ -14,11 +17,6 @@ type IndexResponse struct {
 
 func (s *WebServer) Index(c echo.Context) error {
 	c.JSON(http.StatusOK, IndexResponse{Version: "v0.1.0"})
-	return nil
-}
-
-func (s *WebServer) SpotifyConnect(c echo.Context) error {
-	//Get Authorization code from spotify
 	return nil
 }
 
@@ -70,5 +68,35 @@ func (s *WebServer) TelegramAuth(c echo.Context) error {
 
 	url := s.spotify.GetAuthURL()
 	c.Redirect(http.StatusFound, url)
+	return nil
+}
+
+func (s *WebServer) ProxyRequest(c echo.Context) error {
+
+	platform := c.Param("platform")
+	userid := c.Param("userid")
+
+	//TODO this switch case can be moved to spotify/types.go as a helper
+	var oauthPlatform spotify.OauthPlatform
+	switch platform {
+	case "telegram":
+		oauthPlatform = spotify.PlatformTelegram
+	default:
+		s.server.Logger.Error("Unsupported Platform")
+	}
+
+	spotifyApiPath := strings.SplitAfterN(c.Request().URL.Path, "/", 4)[3]
+	u, err := url.Parse("https://api.spotify.com/" + spotifyApiPath)
+	if err != nil {
+		log.Println("Failed to parse url")
+	}
+	req := c.Request()
+	req.URL = u
+
+	_, err = s.spotify.ProxyRequest(oauthPlatform, userid, req)
+	if err != nil {
+		s.server.Logger.Error(err)
+		return c.String(http.StatusForbidden, "User has not authenticated")
+	}
 	return nil
 }

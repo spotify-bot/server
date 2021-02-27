@@ -1,9 +1,9 @@
 package webserver
 
 import (
-	"github.com/spotify-bot/server/internal/spotify"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
+	"github.com/spotify-bot/server/internal/spotify"
 )
 
 type WebServerOptions struct {
@@ -27,9 +27,12 @@ func New(opts WebServerOptions) *WebServer {
 	}
 
 	e.GET("/", webServer.Index)
-	e.GET("/auth/connect", webServer.SpotifyConnect)   //Get Authorization code from spotify
 	e.GET("/auth/callback", webServer.SpotifyCallback) //Receive access and refesh token from spotify
 	e.GET("/auth/telegram", webServer.TelegramAuth)    //Authenticate Telegram user to spotify
+
+	// Spotify Endpoints
+	e.Any("/spotify/:platform/:userid/*", webServer.ProxyRequest)
+	//TODO /spotify returns 404
 
 	return webServer
 }
