@@ -3,6 +3,7 @@ package webserver
 import (
 	"log"
 	"net/http"
+	"net/http/httputil"
 	"net/url"
 	"strings"
 	"time"
@@ -71,6 +72,11 @@ func (s *WebServer) TelegramAuth(c echo.Context) error {
 	return nil
 }
 
+func (s *WebServer) ReverseProxy() *httputil.ReverseProxy {
+	//TODO how to obtain platform and userid. the hard way ??
+	return nil
+}
+
 func (s *WebServer) ProxyRequest(c echo.Context) error {
 
 	platform := c.Param("platform")
@@ -92,6 +98,7 @@ func (s *WebServer) ProxyRequest(c echo.Context) error {
 	}
 	req := c.Request()
 	req.URL = u
+	log.Print("kiiiirrrr ", req.RequestURI)
 
 	_, err = s.spotify.ProxyRequest(oauthPlatform, userid, req)
 	if err != nil {
