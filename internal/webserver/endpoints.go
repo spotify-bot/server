@@ -1,11 +1,7 @@
 package webserver
 
 import (
-	"log"
 	"net/http"
-	"net/http/httputil"
-	"net/url"
-	"strings"
 	"time"
 
 	"github.com/labstack/echo/v4"
@@ -69,70 +65,5 @@ func (s *WebServer) TelegramAuth(c echo.Context) error {
 
 	url := s.spotify.GetAuthURL()
 	c.Redirect(http.StatusFound, url)
-	return nil
-}
-
-func (s *WebServer) ReverseProxy(c echo.Context) error {
-	platform := c.Param("platform")
-	userid := c.Param("userid")
-
-	//TODO this switch case can be moved to spotify/types.go as a helper
-	var oauthPlatform spotify.OauthPlatform
-	switch platform {
-	case "telegram":
-		oauthPlatform = spotify.PlatformTelegram
-	default:
-		s.server.Logger.Error("Unsupported Platform")
-	}
-
-	spotifyApiPath := "/" + strings.SplitAfterN(c.Request().URL.Path, "/", 5)[4]
-	log.Println("sending request for ", spotifyApiPath)
-
-	target, err := url.Parse("https://api.spotify.com")
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	director := func(req *http.Request) {
-		req.URL.Scheme = target.Scheme
-		req.URL.Host = target.Host
-		req.URL.Path = spotifyApiPath
-		s.spotify.SetRequestHeader(req, oauthPlatform, userid)
-		log.Println("New Request: ", req.URL)
-	}
-	reverseProxy := httputil.ReverseProxy{Director: director}
-	reverseProxy.ServeHTTP(c.Response(), c.Request())
-	log.Println("Arrriiivvvessss")
-	return nil
-}
-
-func (s *WebServer) ProxyRequest(c echo.Context) error {
-
-	platform := c.Param("platform")
-	userid := c.Param("userid")
-
-	//TODO this switch case can be moved to spotify/types.go as a helper
-	var oauthPlatform spotify.OauthPlatform
-	switch platform {
-	case "telegram":
-		oauthPlatform = spotify.PlatformTelegram
-	default:
-		s.server.Logger.Error("Unsupported Platform")
-	}
-
-	spotifyApiPath := strings.SplitAfterN(c.Request().URL.Path, "/", 4)[3]
-	u, err := url.Parse("https://api.spotify.com/" + spotifyApiPath)
-	if err != nil {
-		log.Println("Failed to parse url")
-	}
-	req := c.Request()
-	req.URL = u
-	log.Print("kiiiirrrr ", req.RequestURI)
-
-	_, err = s.spotify.ProxyRequest(oauthPlatform, userid, req)
-	if err != nil {
-		s.server.Logger.Error(err)
-		return c.String(http.StatusForbidden, "User has not authenticated")
-	}
 	return nil
 }

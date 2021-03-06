@@ -30,8 +30,7 @@ func New(opts WebServerOptions) *WebServer {
 	e.GET("/auth/telegram", webServer.TelegramAuth)    //Authenticate Telegram user to spotify
 
 	// Spotify Endpoints
-	e.Any("/spotify/:platform/:userid/*", webServer.ReverseProxy)
-	//TODO /spotify returns 404
+	e.Any("/spotify/*", echo.WrapHandler(webServer.ProxyRequest()))
 
 	return webServer
 }

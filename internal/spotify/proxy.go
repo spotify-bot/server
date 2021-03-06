@@ -2,6 +2,7 @@ package spotify
 
 import (
 	"errors"
+	"io"
 	"log"
 	"net/http"
 )
@@ -24,4 +25,14 @@ func (s *SpotifyProvider) SetRequestHeader(req *http.Request, platform OauthPlat
 		return
 	}
 	token.SetAuthHeader(req)
+}
+
+func (s *SpotifyProvider) CreateRequest(platform OauthPlatform, userid string, method string, url string, body io.ReadCloser) (*http.Response, error) {
+	client, err := s.getUserClient(platform, userid)
+	if err != nil {
+		log.Println("errrrrrrrr ", err)
+		return nil, errors.New("User not found in db")
+	}
+	request, err := http.NewRequest(method, url, body)
+	return client.Do(request)
 }
