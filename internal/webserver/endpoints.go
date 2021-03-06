@@ -72,8 +72,37 @@ func (s *WebServer) TelegramAuth(c echo.Context) error {
 	return nil
 }
 
-func (s *WebServer) ReverseProxy() *httputil.ReverseProxy {
-	//TODO how to obtain platform and userid. the hard way ??
+func (s *WebServer) ReverseProxy(c echo.Context) error {
+	platform := c.Param("platform")
+	userid := c.Param("userid")
+
+	//TODO this switch case can be moved to spotify/types.go as a helper
+	var oauthPlatform spotify.OauthPlatform
+	switch platform {
+	case "telegram":
+		oauthPlatform = spotify.PlatformTelegram
+	default:
+		s.server.Logger.Error("Unsupported Platform")
+	}
+
+	spotifyApiPath := "/" + strings.SplitAfterN(c.Request().URL.Path, "/", 5)[4]
+	log.Println("sending request for ", spotifyApiPath)
+
+	target, err := url.Parse("https://api.spotify.com")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	director := func(req *http.Request) {
+		req.URL.Scheme = target.Scheme
+		req.URL.Host = target.Host
+		req.URL.Path = spotifyApiPath
+		s.spotify.SetRequestHeader(req, oauthPlatform, userid)
+		log.Println("New Request: ", req.URL)
+	}
+	reverseProxy := httputil.ReverseProxy{Director: director}
+	reverseProxy.ServeHTTP(c.Response(), c.Request())
+	log.Println("Arrriiivvvessss")
 	return nil
 }
 

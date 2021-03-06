@@ -98,6 +98,8 @@ func (s *SpotifyProvider) PlaySong(platform OauthPlatform, userID, songURI strin
 	err = playSong(client, songURI)
 	return
 }
+
+//TODO retired after reverse proxy
 func (s *SpotifyProvider) getUserClient(platform OauthPlatform, userID string) (client *http.Client, err error) {
 
 	ctx := context.Background() //TODO add timeout
@@ -114,6 +116,30 @@ func (s *SpotifyProvider) getUserClient(platform OauthPlatform, userID string) (
 	}
 	client = s.authConfig.Client(ctx, token)
 	return
+}
+
+func (s *SpotifyProvider) getUserToken(platform OauthPlatform, userID string) (*oauth2.Token, error) {
+
+	ctx := context.Background() //TODO add timeout
+	mongoToken, err := s.db.GetOAuthTokenByUserID(ctx, userID, string(platform))
+	if err != nil {
+		return nil, err
+	}
+
+	token := &oauth2.Token{
+		AccessToken:  mongoToken.AccessToken,
+		RefreshToken: mongoToken.RefreshToken,
+		TokenType:    mongoToken.TokenType,
+		Expiry:       mongoToken.Expiry,
+	}
+
+	// get token source and retreive token again to make sure token is refereshed if needed
+	tokenSource := s.authConfig.TokenSource(ctx, token)
+	newToken, err := tokenSource.Token()
+	if err != nil {
+		return nil, err
+	}
+	return newToken, nil
 }
 
 func getCurrentlyPlayingSong(client *http.Client) (*Track, error) {
