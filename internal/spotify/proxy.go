@@ -2,13 +2,14 @@ package spotify
 
 import (
 	"errors"
+	"github.com/spotify-bot/server/pkg/spotify"
 	"io"
 	"log"
 	"net/http"
 )
 
 // retired after reverse proxy
-func (s *SpotifyProvider) ProxyRequest(platform OauthPlatform, userid string, request *http.Request) (*http.Response, error) {
+func (s *SpotifyProvider) ProxyRequest(platform spotify.OauthPlatform, userid string, request *http.Request) (*http.Response, error) {
 	client, err := s.getUserClient(platform, userid)
 	if err != nil {
 		log.Println("errrrrrrrr ", err)
@@ -17,7 +18,7 @@ func (s *SpotifyProvider) ProxyRequest(platform OauthPlatform, userid string, re
 	return client.Do(request)
 }
 
-func (s *SpotifyProvider) SetRequestHeader(req *http.Request, platform OauthPlatform, userid string) {
+func (s *SpotifyProvider) SetRequestHeader(req *http.Request, platform spotify.OauthPlatform, userid string) {
 
 	//FIXME what if user does not exist ? do not fill header so client gets the error from spotify ?
 	token, err := s.getUserToken(platform, userid)
@@ -27,7 +28,7 @@ func (s *SpotifyProvider) SetRequestHeader(req *http.Request, platform OauthPlat
 	token.SetAuthHeader(req)
 }
 
-func (s *SpotifyProvider) CreateRequest(platform OauthPlatform, userid string, method string, url string, body io.ReadCloser) (*http.Response, error) {
+func (s *SpotifyProvider) CreateRequest(platform spotify.OauthPlatform, userid string, method string, url string, body io.ReadCloser) (*http.Response, error) {
 	client, err := s.getUserClient(platform, userid)
 	if err != nil {
 		log.Println("errrrrrrrr ", err)

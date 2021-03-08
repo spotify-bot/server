@@ -5,7 +5,7 @@ import (
 	"time"
 
 	"github.com/labstack/echo/v4"
-	"github.com/spotify-bot/server/internal/spotify"
+	"github.com/spotify-bot/server/pkg/spotify"
 )
 
 type IndexResponse struct {

@@ -1,7 +1,8 @@
 package webserver
 
 import (
-	"github.com/spotify-bot/server/internal/spotify"
+	provider "github.com/spotify-bot/server/internal/spotify"
+	"github.com/spotify-bot/server/pkg/spotify"
 	"log"
 	"net/http"
 	"net/http/httputil"
@@ -11,7 +12,7 @@ import (
 
 type spotifyProxy struct {
 	reverseProxy *httputil.ReverseProxy
-	spotify      *spotify.SpotifyProvider
+	spotify      *provider.SpotifyProvider
 }
 
 func (s *WebServer) ProxyRequest() *spotifyProxy {

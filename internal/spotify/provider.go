@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/spotify-bot/server/internal/mongo"
+	"github.com/spotify-bot/server/pkg/spotify"
 	"golang.org/x/oauth2"
 	"io/ioutil"
 	"log"
@@ -46,7 +47,7 @@ func (s *SpotifyProvider) GetAuthURL() string {
 	return s.authConfig.AuthCodeURL("state", oauth2.AccessTypeOffline)
 }
 
-func (s *SpotifyProvider) AddUser(code string, platform OauthPlatform, userID string) error {
+func (s *SpotifyProvider) AddUser(code string, platform spotify.OauthPlatform, userID string) error {
 	ctx := context.Background() //FIXME
 	token, err := s.authConfig.Exchange(ctx, code)
 	if err != nil {
@@ -69,7 +70,7 @@ func (s *SpotifyProvider) AddUser(code string, platform OauthPlatform, userID st
 	return nil
 }
 
-func (s *SpotifyProvider) GetRecentlyPlayed(platform OauthPlatform, userID string) (track *Track, err error) {
+func (s *SpotifyProvider) GetRecentlyPlayed(platform spotify.OauthPlatform, userID string) (track *spotify.Track, err error) {
 	client, err := s.getUserClient(platform, userID)
 	if err != nil {
 		return
@@ -81,7 +82,7 @@ func (s *SpotifyProvider) GetRecentlyPlayed(platform OauthPlatform, userID strin
 	return
 }
 
-func (s *SpotifyProvider) AddSongToQueue(platform OauthPlatform, userID, songURI string) (err error) {
+func (s *SpotifyProvider) AddSongToQueue(platform spotify.OauthPlatform, userID, songURI string) (err error) {
 	client, err := s.getUserClient(platform, userID)
 	if err != nil {
 		return
@@ -90,7 +91,7 @@ func (s *SpotifyProvider) AddSongToQueue(platform OauthPlatform, userID, songURI
 	return
 }
 
-func (s *SpotifyProvider) PlaySong(platform OauthPlatform, userID, songURI string) (err error) {
+func (s *SpotifyProvider) PlaySong(platform spotify.OauthPlatform, userID, songURI string) (err error) {
 	client, err := s.getUserClient(platform, userID)
 	if err != nil {
 		return
@@ -100,7 +101,7 @@ func (s *SpotifyProvider) PlaySong(platform OauthPlatform, userID, songURI strin
 }
 
 //TODO retired after reverse proxy
-func (s *SpotifyProvider) getUserClient(platform OauthPlatform, userID string) (client *http.Client, err error) {
+func (s *SpotifyProvider) getUserClient(platform spotify.OauthPlatform, userID string) (client *http.Client, err error) {
 
 	ctx := context.Background() //TODO add timeout
 	mongoToken, err := s.db.GetOAuthTokenByUserID(ctx, userID, string(platform))
@@ -118,7 +119,7 @@ func (s *SpotifyProvider) getUserClient(platform OauthPlatform, userID string) (
 	return
 }
 
-func (s *SpotifyProvider) getUserToken(platform OauthPlatform, userID string) (*oauth2.Token, error) {
+func (s *SpotifyProvider) getUserToken(platform spotify.OauthPlatform, userID string) (*oauth2.Token, error) {
 
 	ctx := context.Background() //TODO add timeout
 	mongoToken, err := s.db.GetOAuthTokenByUserID(ctx, userID, string(platform))
@@ -142,15 +143,15 @@ func (s *SpotifyProvider) getUserToken(platform OauthPlatform, userID string) (*
 	return newToken, nil
 }
 
-func getCurrentlyPlayingSong(client *http.Client) (*Track, error) {
-	resp, err := client.Get(CurrentlyPlayingEndpoint)
+func getCurrentlyPlayingSong(client *http.Client) (*spotify.Track, error) {
+	resp, err := client.Get(spotify.CurrentlyPlayingEndpoint)
 	if err != nil {
 		return nil, err
 	}
 	defer resp.Body.Close()
 	if resp.StatusCode != http.StatusOK {
-		return nil, CallbackError{
-			CurrentlyPlayingEndpoint,
+		return nil, spotify.CallbackError{
+			spotify.CurrentlyPlayingEndpoint,
 			resp.StatusCode,
 		}
 	}
@@ -159,16 +160,16 @@ func getCurrentlyPlayingSong(client *http.Client) (*Track, error) {
 		return nil, err
 	}
 
-	var response CurrentlyPlayingResponse
+	var response spotify.CurrentlyPlayingResponse
 	if err = json.Unmarshal(body, &response); err != nil {
 		return nil, err
 	}
 	return &response.Track, nil
 }
 
-func getRecentlyPlayedSong(client *http.Client) (*Track, error) {
+func getRecentlyPlayedSong(client *http.Client) (*spotify.Track, error) {
 
-	resp, err := client.Get(RecentlyPlayedEndpoint + "?limit=1") //FIXME
+	resp, err := client.Get(spotify.RecentlyPlayedEndpoint + "?limit=1") //FIXME
 	if err != nil {
 		return nil, err
 	}
@@ -178,7 +179,7 @@ func getRecentlyPlayedSong(client *http.Client) (*Track, error) {
 		return nil, err
 	}
 
-	var response RecentlyPlayedResponse
+	var response spotify.RecentlyPlayedResponse
 	if err = json.Unmarshal(body, &response); err != nil {
 		return nil, err
 	}
@@ -186,7 +187,7 @@ func getRecentlyPlayedSong(client *http.Client) (*Track, error) {
 }
 
 func addSongToQueue(client *http.Client, songURI string) error {
-	req, err := http.NewRequest("POST", AddToQueueEndpoint+"?uri="+songURI, nil)
+	req, err := http.NewRequest("POST", spotify.AddToQueueEndpoint+"?uri="+songURI, nil)
 	if err != nil {
 		return err
 	}
@@ -204,7 +205,7 @@ func addSongToQueue(client *http.Client, songURI string) error {
 func playSong(client *http.Client, songURI string) error {
 
 	var jsonStr = []byte(`{"uris":["` + songURI + `"]}`)
-	req, err := http.NewRequest("PUT", PlaySongEndpoint, bytes.NewBuffer(jsonStr))
+	req, err := http.NewRequest("PUT", spotify.PlaySongEndpoint, bytes.NewBuffer(jsonStr))
 	if err != nil {
 		return err
 	}
