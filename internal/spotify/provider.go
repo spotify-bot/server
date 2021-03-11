@@ -70,55 +70,6 @@ func (s *SpotifyProvider) AddUser(code string, platform spotify.OauthPlatform, u
 	return nil
 }
 
-func (s *SpotifyProvider) GetRecentlyPlayed(platform spotify.OauthPlatform, userID string) (track *spotify.Track, err error) {
-	client, err := s.getUserClient(platform, userID)
-	if err != nil {
-		return
-	}
-	track, err = getCurrentlyPlayingSong(client)
-	if err != nil {
-		track, err = getRecentlyPlayedSong(client)
-	}
-	return
-}
-
-func (s *SpotifyProvider) AddSongToQueue(platform spotify.OauthPlatform, userID, songURI string) (err error) {
-	client, err := s.getUserClient(platform, userID)
-	if err != nil {
-		return
-	}
-	err = addSongToQueue(client, songURI)
-	return
-}
-
-func (s *SpotifyProvider) PlaySong(platform spotify.OauthPlatform, userID, songURI string) (err error) {
-	client, err := s.getUserClient(platform, userID)
-	if err != nil {
-		return
-	}
-	err = playSong(client, songURI)
-	return
-}
-
-//TODO retired after reverse proxy
-func (s *SpotifyProvider) getUserClient(platform spotify.OauthPlatform, userID string) (client *http.Client, err error) {
-
-	ctx := context.Background() //TODO add timeout
-	mongoToken, err := s.db.GetOAuthTokenByUserID(ctx, userID, string(platform))
-	if err != nil {
-		return
-	}
-
-	token := &oauth2.Token{
-		AccessToken:  mongoToken.AccessToken,
-		RefreshToken: mongoToken.RefreshToken,
-		TokenType:    mongoToken.TokenType,
-		Expiry:       mongoToken.Expiry,
-	}
-	client = s.authConfig.Client(ctx, token)
-	return
-}
-
 func (s *SpotifyProvider) getUserToken(platform spotify.OauthPlatform, userID string) (*oauth2.Token, error) {
 
 	ctx := context.Background() //TODO add timeout
@@ -165,57 +116,4 @@ func getCurrentlyPlayingSong(client *http.Client) (*spotify.Track, error) {
 		return nil, err
 	}
 	return &response.Track, nil
-}
-
-func getRecentlyPlayedSong(client *http.Client) (*spotify.Track, error) {
-
-	resp, err := client.Get(spotify.RecentlyPlayedEndpoint + "?limit=1") //FIXME
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-	body, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		return nil, err
-	}
-
-	var response spotify.RecentlyPlayedResponse
-	if err = json.Unmarshal(body, &response); err != nil {
-		return nil, err
-	}
-	return &response.Items[0].Track, nil
-}
-
-func addSongToQueue(client *http.Client, songURI string) error {
-	req, err := http.NewRequest("POST", spotify.AddToQueueEndpoint+"?uri="+songURI, nil)
-	if err != nil {
-		return err
-	}
-	resp, err := client.Do(req)
-	if err != nil {
-		return err
-	}
-	defer resp.Body.Close()
-	if resp.StatusCode != http.StatusNoContent {
-		return fmt.Errorf("request error code: %d", resp.StatusCode)
-	}
-	return nil
-}
-
-func playSong(client *http.Client, songURI string) error {
-
-	var jsonStr = []byte(`{"uris":["` + songURI + `"]}`)
-	req, err := http.NewRequest("PUT", spotify.PlaySongEndpoint, bytes.NewBuffer(jsonStr))
-	if err != nil {
-		return err
-	}
-	resp, err := client.Do(req)
-	if err != nil {
-		return err
-	}
-	defer resp.Body.Close()
-	if resp.StatusCode != http.StatusNoContent {
-		return fmt.Errorf("request error code: %d", resp.StatusCode)
-	}
-	return nil
 }
