@@ -7,10 +7,10 @@ type OauthPlatform string
 const (
 	OpenSpotifyTrackEndpoint               = "https://open.spotify.com/track/"
 	TrackURIPrefix                         = "spotify:track:"
-	CurrentlyPlayingEndpoint               = "https://api.spotify.com/v1/me/player/currently-playing"
-	RecentlyPlayedEndpoint                 = "https://api.spotify.com/v1/me/player/recently-played"
-	AddToQueueEndpoint                     = "https://api.spotify.com/v1/me/player/queue"
-	PlaySongEndpoint                       = "https://api.spotify.com/v1/me/player/play"
+	CurrentlyPlayingEndpoint               = "/v1/me/player/currently-playing"
+	RecentlyPlayedEndpoint                 = "/v1/me/player/recently-played"
+	AddToQueueEndpoint                     = "/v1/me/player/queue"
+	PlaySongEndpoint                       = "/v1/me/player/play"
 	PlatformTelegram         OauthPlatform = "telegram"
 )
 
