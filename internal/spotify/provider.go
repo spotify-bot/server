@@ -1,10 +1,8 @@
 package spotify
 
 import (
-	"bytes"
 	"context"
 	"encoding/json"
-	"fmt"
 	"github.com/spotify-bot/server/internal/mongo"
 	"github.com/spotify-bot/server/pkg/spotify"
 	"golang.org/x/oauth2"

@@ -1,22 +1,9 @@
 package spotify
 
 import (
-	"errors"
 	"github.com/spotify-bot/server/pkg/spotify"
-	"io"
-	"log"
 	"net/http"
 )
-
-// retired after reverse proxy
-func (s *SpotifyProvider) ProxyRequest(platform spotify.OauthPlatform, userid string, request *http.Request) (*http.Response, error) {
-	client, err := s.getUserClient(platform, userid)
-	if err != nil {
-		log.Println("errrrrrrrr ", err)
-		return nil, errors.New("User not found in db")
-	}
-	return client.Do(request)
-}
 
 func (s *SpotifyProvider) SetRequestHeader(req *http.Request, platform spotify.OauthPlatform, userid string) {
 
@@ -26,14 +13,4 @@ func (s *SpotifyProvider) SetRequestHeader(req *http.Request, platform spotify.O
 		return
 	}
 	token.SetAuthHeader(req)
-}
-
-func (s *SpotifyProvider) CreateRequest(platform spotify.OauthPlatform, userid string, method string, url string, body io.ReadCloser) (*http.Response, error) {
-	client, err := s.getUserClient(platform, userid)
-	if err != nil {
-		log.Println("errrrrrrrr ", err)
-		return nil, errors.New("User not found in db")
-	}
-	request, err := http.NewRequest(method, url, body)
-	return client.Do(request)
 }
