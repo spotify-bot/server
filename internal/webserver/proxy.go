@@ -4,7 +4,6 @@ import (
 	"bytes"
 	provider "github.com/spotify-bot/server/internal/spotify"
 	"github.com/spotify-bot/server/pkg/spotify"
-	"io/ioutil"
 	"log"
 	"net/http"
 	"net/http/httputil"
@@ -55,15 +54,13 @@ func (s *spotifyProxy) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
 
 	url := "https://api.spotify.com/" + spotifyApiPath
 
-	newRequest, err := http.NewRequest(req.Method, url, nil)
+	var b bytes.Buffer
+	b.ReadFrom(req.Body)
+
+	newRequest, err := http.NewRequest(req.Method, url, bytes.NewReader(b.Bytes()))
 	if err != nil {
 		log.Fatal("Failed to Create New Request: ", err)
 	}
-
-	var b bytes.Buffer
-	b.ReadFrom(req.Body)
-	//req.Body = ioutil.NopCloser(&b)
-	newRequest.Body = ioutil.NopCloser(bytes.NewReader(b.Bytes()))
 
 	//req.URL.Scheme = target.Scheme
 	//req.URL.Host = target.Host
