@@ -11,9 +11,9 @@ ENV HOME /app
 WORKDIR /app
 COPY . .
 RUN go mod download
-RUN	env GOOS=$OS GOARCH=$ARCH go build -o build/webserver github.com/spotify-bot/server/cmd/main.go
+RUN	env GOOS=$OS GOARCH=$ARCH go build -o build cmd/main.go
 
 FROM alpine:3.12 as app
 
 WORKDIR /app
-COPY --from=builder /app/build/webserver /app
+COPY --from=builder /app/build /app
