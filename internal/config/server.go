@@ -19,6 +19,6 @@ type Spotify struct {
 
 var AppConfig Config
 
-func initMamalConfig() {
+func initConfig() {
 	loadConfig(&AppConfig)
 }

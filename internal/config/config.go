@@ -19,7 +19,7 @@ func init() {
 		panic("No config path provided to run the application")
 	}
 
-	initMamalConfig()
+	initConfig()
 }
 
 func loadConfig(configStruct interface{}) {
