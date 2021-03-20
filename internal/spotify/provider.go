@@ -2,11 +2,9 @@ package spotify
 
 import (
 	"context"
-	"encoding/json"
 	"github.com/spotify-bot/server/internal/mongo"
 	"github.com/spotify-bot/server/pkg/spotify"
 	"golang.org/x/oauth2"
-	"io/ioutil"
 	"log"
 	"net/http"
 )
@@ -92,26 +90,12 @@ func (s *SpotifyProvider) getUserToken(platform spotify.OauthPlatform, userID st
 	return newToken, nil
 }
 
-func getCurrentlyPlayingSong(client *http.Client) (*spotify.Track, error) {
-	resp, err := client.Get(spotify.CurrentlyPlayingEndpoint)
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-	if resp.StatusCode != http.StatusOK {
-		return nil, spotify.CallbackError{
-			spotify.CurrentlyPlayingEndpoint,
-			resp.StatusCode,
-		}
-	}
-	body, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		return nil, err
-	}
+func (s *SpotifyProvider) SetRequestHeader(req *http.Request, platform spotify.OauthPlatform, userid string) {
 
-	var response spotify.CurrentlyPlayingResponse
-	if err = json.Unmarshal(body, &response); err != nil {
-		return nil, err
+	//FIXME what if user does not exist ? do not fill header so client gets the error from spotify ?
+	token, err := s.getUserToken(platform, userid)
+	if err != nil {
+		return
 	}
-	return &response.Track, nil
+	token.SetAuthHeader(req)
 }
