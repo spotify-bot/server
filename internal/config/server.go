@@ -1,20 +1,11 @@
 package config
 
 type Config struct {
-	Webserver Webserver `mapstructure:"webserver"`
-	Spotify   Spotify   `mapstructure:"spotify"`
-}
-
-type Webserver struct {
-	Address   string `mapstructure:"address"`
-	JWTSecret string `mapstructure:"jwtSecret"`
-	MongoDSN  string `mapstructure:"mongoDSN"`
-}
-
-type Spotify struct {
-	ApiServerAddress    string `mapstructure:"apiServerAddress"`
-	SpotifyClientID     string `mapstructure:"clientID"`
-	SpotifyClientSecret string `mapstructure:"clientSecret"`
+	Address          string `mapstructure:"ADDRESS"`
+	MongoDSN         string `mapstructure:"MONGO_DSN"`
+	APIServerAddress string `mapstructure:"API_SERVER_ADDRESS"`
+	ClientID         string `mapstructure:"CLIENT_ID"`
+	ClientSecret     string `mapstructure:"CLIENT_SECRET"`
 }
 
 var AppConfig Config

@@ -15,10 +15,6 @@ func init() {
 	flag.StringVar(&ConfigPath, "config-path", "", "Path to config directory")
 	flag.Parse()
 
-	if ConfigPath == "" {
-		panic("No config path provided to run the application")
-	}
-
 	initConfig()
 }
 
@@ -26,7 +22,9 @@ func loadConfig(configStruct interface{}) {
 	viperInstance := viper.New()
 	viperInstance.SetConfigName(ConfigPath)
 	viperInstance.AddConfigPath(".")
-	viperInstance.SetConfigType("yaml")
+	viperInstance.SetConfigType("env")
+
+	viper.AutomaticEnv()
 
 	err := viperInstance.ReadInConfig()
 	if err != nil {
