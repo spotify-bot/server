@@ -21,7 +21,7 @@ var (
 
 func init() {
 	// Register flags
-	flag.StringVar(&ConfigName, "config-name", "", "Path to config directory")
+	flag.StringVar(&ConfigName, "config", "", "name of config env file")
 	flag.Parse()
 
 	loadConfig(&AppConfig)
