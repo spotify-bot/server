@@ -1,4 +1,9 @@
-MODULE := github.com/spotify-bot/server
+#!make
+
+SHELL=/bin/sh
+SERVICE_COMPOSE_FILE=docker-compose-service.yaml
+
+-include: .env .env.local .env.*.local
 
 deps:
 	go mod download
@@ -11,3 +16,14 @@ docker:
 
 lint:
 	golangci-lint run --disable errcheck
+
+service.build:
+	docker-compose -f ${SERVICE_COMPOSE_FILE} build --pull
+
+service.run:
+	ADDRESS=${ADDRESS} \
+	MONGO_DSN=${MONGO_DSN} \
+	API_SERVER_ADDRESS=${API_SERVER_ADDRESS} \
+	CLIENT_ID=${CLIENT_ID} \
+	CLIENT_SECRET=${CLIENT_SECRET} \
+	docker-compose -f ${SERVICE_COMPOSE_FILE} up -d

@@ -1,0 +1,21 @@
+FROM golang:1.15 as builder
+
+ARG ARCH=amd64
+ARG OS=linux
+
+SHELL ["/bin/bash", "-c"]
+
+ENV CGO_ENABLED 0
+ENV HOME /app
+
+WORKDIR /app
+COPY . .
+RUN go mod download
+RUN	env GOOS=$OS GOARCH=$ARCH go build -o server cmd/main.go
+
+FROM envoyproxy/envoy-alpine-dev:latest as app
+
+WORKDIR /app
+COPY --from=builder /app/server /app
+ADD ./envoy/start-service.sh /usr/local/bin/start-service.sh
+ENTRYPOINT ["/bin/sh", "/usr/local/bin/start-service.sh"]

@@ -1,0 +1,21 @@
+version: "3.7"
+
+services:
+  webserver:
+    build:
+      context: .
+      dockerfile: Dockerfile-service
+    volumes:
+      - ./envoy/service-envoy.yaml:/etc/service-envoy.yaml
+    networks:
+      - envoymesh
+    environment:
+      SERVICE_NAME: webserver
+      ADDRESS: $ADDRESS
+      MONGO_DSN: $MONGO_DSN
+      API_SERVER_ADDRESS: $API_SERVER_ADDRESS
+      CLIENT_ID: $CLIENT_ID
+      CLIENT_SECRET: $CLIENT_SECRET
+
+networks:
+  envoymesh: {}
