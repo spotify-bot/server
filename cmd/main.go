@@ -15,19 +15,19 @@ func main() {
 	ctx := context.Background()
 
 	authConf := &oauth2.Config{
-		ClientID:     config.AppConfig.Spotify.SpotifyClientID,
-		ClientSecret: config.AppConfig.Spotify.SpotifyClientSecret,
+		ClientID:     config.AppConfig.ClientID,
+		ClientSecret: config.AppConfig.ClientSecret,
 		Scopes: []string{
 			"user-read-currently-playing",
 			"user-read-recently-played",
 			"user-modify-playback-state",
 		},
 		Endpoint:    spotifyOauth.Endpoint,
-		RedirectURL: "http://" + config.AppConfig.Spotify.ApiServerAddress + "/auth/callback", //FIXME
+		RedirectURL: "http://" + config.AppConfig.APIServerAddress + "/auth/callback", //FIXME
 	}
 
 	s, err := spotify.New(ctx, spotify.ProviderOptions{
-		DatabaseDSN: config.AppConfig.Webserver.MongoDSN,
+		DatabaseDSN: config.AppConfig.MongoDSN,
 		AuthConfig:  authConf,
 	})
 	if err != nil {
@@ -38,7 +38,7 @@ func main() {
 		Spotify: s,
 	})
 
-	err = w.Start(config.AppConfig.Webserver.Address)
+	err = w.Start(config.AppConfig.Address)
 
 	if err != nil {
 		log.Fatalln("Cannot start server", err)
