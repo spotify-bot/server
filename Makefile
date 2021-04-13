@@ -1,9 +1,9 @@
 #!make
 
 SHELL=/bin/sh
-SERVICE_COMPOSE_FILE=docker-compose-service.yaml
 
--include: .env .env.local .env.*.local
+SERVICE_COMPOSE_FILE ?= docker-compose-service.yaml
+CONFIF_ENV_FILE ?= app.env
 
 deps:
 	go mod download
@@ -16,14 +16,10 @@ docker:
 
 lint:
 	golangci-lint run --disable errcheck
-
 service.build:
-	docker-compose -f ${SERVICE_COMPOSE_FILE} build --pull
+	docker compose -f ${SERVICE_COMPOSE_FILE} build --pull
 
 service.run:
-	ADDRESS=${ADDRESS} \
-	MONGO_DSN=${MONGO_DSN} \
-	API_SERVER_ADDRESS=${API_SERVER_ADDRESS} \
-	CLIENT_ID=${CLIENT_ID} \
-	CLIENT_SECRET=${CLIENT_SECRET} \
-	docker-compose -f ${SERVICE_COMPOSE_FILE} up -d
+	docker compose -f ${SERVICE_COMPOSE_FILE} \
+	--env-file ${CONFIF_ENV_FILE} \
+	up -d
