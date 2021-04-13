@@ -16,10 +16,3 @@ docker:
 
 lint:
 	golangci-lint run --disable errcheck
-service.build:
-	docker compose -f ${SERVICE_COMPOSE_FILE} build --pull
-
-service.run:
-	docker compose -f ${SERVICE_COMPOSE_FILE} \
-	--env-file ${CONFIF_ENV_FILE} \
-	up -d
