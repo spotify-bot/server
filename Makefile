@@ -1,4 +1,9 @@
-MODULE := github.com/spotify-bot/server
+#!make
+
+SHELL=/bin/sh
+
+SERVICE_COMPOSE_FILE ?= docker-compose-service.yaml
+CONFIF_ENV_FILE ?= app.env
 
 deps:
 	go mod download
