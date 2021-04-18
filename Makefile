@@ -2,7 +2,6 @@
 
 SHELL=/bin/sh
 
-SERVICE_COMPOSE_FILE ?= docker-compose-service.yaml
 CONFIF_ENV_FILE ?= app.env
 
 deps:
@@ -16,3 +15,8 @@ docker:
 
 lint:
 	golangci-lint run --disable errcheck
+
+run:
+	docker compose \
+    --env-file ${CONFIF_ENV_FILE} \
+    up -d
