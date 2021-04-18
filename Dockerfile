@@ -17,4 +17,4 @@ FROM alpine:3.12 as app
 
 WORKDIR /app
 COPY --from=builder /app/server /app
-CMD ["/app/server"]
+ENTRYPOINT ["/app/server"]
