@@ -11,9 +11,10 @@ ENV HOME /app
 WORKDIR /app
 COPY . .
 RUN go mod download
-RUN	env GOOS=$OS GOARCH=$ARCH go build -o build cmd/main.go
+RUN	env GOOS=$OS GOARCH=$ARCH go build -o server cmd/main.go
 
 FROM alpine:3.12 as app
 
 WORKDIR /app
-COPY --from=builder /app/build /app
+COPY --from=builder /app/server /app
+CMD ["/app/server"]
