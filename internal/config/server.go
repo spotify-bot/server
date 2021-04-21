@@ -52,6 +52,7 @@ func loadConfig(configStruct interface{}) {
 		callbackAddress := viperInstance.GetString("CALLBACK_ADDRESS")
 		clientID := viperInstance.GetString("CLIENT_ID")
 		clientSecret := viperInstance.GetString("CLIENT_SECRET")
+		log.Println("callbackaddr: ", callbackAddress)
 		if len(address) > 0 && len(mongoDSN) > 0 && len(callbackAddress) > 0 && len(clientID) > 0 && len(clientSecret) > 0 {
 			AppConfig = Config{
 				Address:         address,
