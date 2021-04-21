@@ -23,7 +23,7 @@ func main() {
 			"user-modify-playback-state",
 		},
 		Endpoint:    spotifyOauth.Endpoint,
-		RedirectURL: "http://" + config.AppConfig.APIServerAddress + "/auth/callback", //FIXME
+		RedirectURL: config.AppConfig.CallbackAddress,
 	}
 
 	s, err := spotify.New(ctx, spotify.ProviderOptions{

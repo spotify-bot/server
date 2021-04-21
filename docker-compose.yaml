@@ -13,7 +13,6 @@ services:
   webserver:
     build:
       context: .
-      dockerfile: Dockerfile
     networks:
       - database
     ports: 
@@ -22,7 +21,7 @@ services:
       SERVICE_NAME: webserver
       ADDRESS: $ADDRESS
       MONGO_DSN: $MONGO_DSN
-      API_SERVER_ADDRESS: $API_SERVER_ADDRESS
+      CALLBACK_ADDRESS: $CALLBACK_ADDRESS
       CLIENT_ID: $CLIENT_ID
       CLIENT_SECRET: $CLIENT_SECRET
     depends_on:

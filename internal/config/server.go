@@ -7,11 +7,11 @@ import (
 )
 
 type Config struct {
-	Address          string `mapstructure:"ADDRESS"`
-	MongoDSN         string `mapstructure:"MONGO_DSN"`
-	APIServerAddress string `mapstructure:"API_SERVER_ADDRESS"`
-	ClientID         string `mapstructure:"CLIENT_ID"`
-	ClientSecret     string `mapstructure:"CLIENT_SECRET"`
+	Address         string `mapstructure:"ADDRESS"`
+	MongoDSN        string `mapstructure:"MONGO_DSN"`
+	CallbackAddress string `mapstructure:"CALLBACK_ADDRESS"`
+	ClientID        string `mapstructure:"CLIENT_ID"`
+	ClientSecret    string `mapstructure:"CLIENT_SECRET"`
 }
 
 var (
@@ -26,7 +26,6 @@ func init() {
 
 	loadConfig(&AppConfig)
 }
-
 func loadConfig(configStruct interface{}) {
 	viperInstance := viper.New()
 
@@ -50,16 +49,17 @@ func loadConfig(configStruct interface{}) {
 		viperInstance.AutomaticEnv()
 		address := viperInstance.GetString("ADDRESS")
 		mongoDSN := viperInstance.GetString("MONGO_DSN")
-		apiServerAddress := viperInstance.GetString("API_SERVER_ADDRESS")
+		callbackAddress := viperInstance.GetString("CALLBACK_ADDRESS")
 		clientID := viperInstance.GetString("CLIENT_ID")
 		clientSecret := viperInstance.GetString("CLIENT_SECRET")
-		if len(address) > 0 && len(mongoDSN) > 0 && len(apiServerAddress) > 0 && len(clientID) > 0 && len(clientSecret) > 0 {
+		log.Println("callbackaddr: ", callbackAddress)
+		if len(address) > 0 && len(mongoDSN) > 0 && len(callbackAddress) > 0 && len(clientID) > 0 && len(clientSecret) > 0 {
 			AppConfig = Config{
-				Address:          address,
-				MongoDSN:         mongoDSN,
-				APIServerAddress: apiServerAddress,
-				ClientID:         clientID,
-				ClientSecret:     clientSecret,
+				Address:         address,
+				MongoDSN:        mongoDSN,
+				CallbackAddress: callbackAddress,
+				ClientID:        clientID,
+				ClientSecret:    clientSecret,
 			}
 		} else {
 			log.Panic("ENV Vars should be set")
