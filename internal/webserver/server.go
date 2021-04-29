@@ -28,6 +28,7 @@ func New(opts WebServerOptions) *WebServer {
 
 	e.GET("/auth/callback", webServer.SpotifyCallback) //Receive access and refesh token from spotify
 	e.GET("/auth/telegram", webServer.TelegramAuth)    //Authenticate Telegram user to spotify
+	e.GET("/", webServer.Index)
 
 	// Spotify Endpoints
 	e.Any("/spotify/*", echo.WrapHandler(webServer.ProxyRequest()))
